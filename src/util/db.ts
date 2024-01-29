@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize";
 
 const sequelize = new Sequelize("postgres://postgres@localhost:5432/postgres")
 
-const connectToDatabase =async () => {
+const connectToDatabase = async () => {
     try {
         await sequelize.authenticate()
         console.log("Database connection OK")
