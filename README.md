@@ -12,7 +12,7 @@ Visual Studio Code, the [Remote Development](https://marketplace.visualstudio.co
 
     ```
     git clone https://github.com/patteri1/backend.git
-    code ./backend
+    code backend
     ```
 
 2. VS Code should prompt you to reopen the folder in a container. Click "Reopen in Container".
