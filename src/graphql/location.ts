@@ -1,4 +1,5 @@
 import { Location } from '../model/Location'
+import { Storage } from '../model/Storage'
 
 export const typeDef = `
     extend type Query {
@@ -6,6 +7,12 @@ export const typeDef = `
         allLocations: [Location]
     } 
 
+    type Storage {
+        id: Int!
+        name: String!
+        locationId: Int!
+    }
+    
     type Location {
         id: Int!
         name: String!
@@ -13,6 +20,7 @@ export const typeDef = `
         postalCode: String!
         city: String!
         price: Float!
+        storage: [Storage]!
     }
 `
 
@@ -23,7 +31,7 @@ export const resolvers = {
             const { id } = args
 
             try {
-                const location = await Location.findByPk(id); // Use findByPk to find the location by its primary key (id)
+                const location = await Location.findByPk(id, {include: 'storage'}); // Use findByPk to find the location by its primary key (id)
                 if (!location) {
                     throw new Error(`Location with ID ${id} not found`);
                 }
@@ -38,7 +46,7 @@ export const resolvers = {
         // get all locations
         allLocations: async () =>  { 
             try {
-                const allLocations = await Location.findAll()
+                const allLocations = await Location.findAll({include: 'storage'})
 
                 return allLocations
 
