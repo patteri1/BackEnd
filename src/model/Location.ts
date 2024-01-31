@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize'
-import { sequelize} from '../util/db'
+import { sequelize } from '../util/db'
+import { Storage } from './Storage'
 
 export class Location extends Model {
     // type definitions
@@ -40,3 +41,5 @@ Location.init({
     modelName: 'location',
     timestamps: false,
 })
+
+Location.hasMany(Storage);

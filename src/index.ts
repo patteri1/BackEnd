@@ -26,7 +26,7 @@ const start = async () => {
 
   // connect and synchronise database
   await connectToDatabase()
-  sequelize.sync() // create or update tables in the database to match model definitions
+  sequelize.sync({force: true}) // create or update tables in the database to match model definitions
 
   // start express
   app.listen(port, () => {
