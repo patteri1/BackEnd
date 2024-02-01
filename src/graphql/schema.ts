@@ -6,15 +6,26 @@ import { typeDef as Location, resolvers as locationResolvers } from './location'
 // this is extended, fake empty field added as you cannot have an empty type
 const Query = `
     type Query {
-        _empty: String
+        locations: [Location]
+        location(id: ID): Location
     }
 `
+const Mutation = `
+  type Mutation {
+    addAmountToStorage(locationId: Int!, amount: Int!): Storage
+    deleteAmountFromStorage(locationId: Int!, amount: Int!): Storage
+  }
+`;
 
 // resolvers from other files are merged to this
-const resolvers = {}
+const resolvers = {
+    Query: {},
+    Mutation: {}
+    
+}
 
 // put everything together and make the schema
 export const schema = makeExecutableSchema({
-    typeDefs: [Query, Location],
+    typeDefs: [Mutation, Query, Location],
     resolvers: merge(resolvers, locationResolvers),
 })
