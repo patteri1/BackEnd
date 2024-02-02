@@ -1,7 +1,7 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize} from '../util/db'
 
-export class Location extends Model {
+export default class Location extends Model {
     // type definitions
     declare id: number
     declare name: string

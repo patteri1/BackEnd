@@ -4,8 +4,7 @@ import cors from 'cors'
 import { expressMiddleware } from '@apollo/server/express4'
 
 import { schema } from './graphql/schema'
-import { connectToDatabase, sequelize } from './util/db'
-import usersRouter from './controllers/users'
+import { connectToDatabase, initializeRoles, sequelize } from './util/db'
 
 const app = express();
 const port = 3000;
@@ -25,12 +24,10 @@ const start = async () => {
   app.use(express.json())
   app.use('/graphql', expressMiddleware(apollo))
 
-  // set up routes
-  app.use('/api/users', usersRouter)
-
-  // connect and synchronise database
+  // set up database
   await connectToDatabase()
-  sequelize.sync() // create or update tables in the database to match model definitions
+  await sequelize.sync() // create or update tables in the database to match model definitions
+  await initializeRoles()
 
   // start express
   app.listen(port, () => {
