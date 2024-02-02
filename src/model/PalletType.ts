@@ -3,6 +3,7 @@ import { sequelize } from '../util/db'
 import { Storage } from './Storage'
 
 export class PalletType extends Model {
+    declare palletTypeId: number
     declare locationId: number
     declare amount: number
 }
@@ -10,6 +11,7 @@ export class PalletType extends Model {
 PalletType.init({
     palletTypeId: {
         type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true,
     },
     product: {
