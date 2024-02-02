@@ -1,10 +1,12 @@
-import { Model, DataTypes } from 'sequelize'
-import { sequelize} from '../util/db'
+import { Model, DataTypes, BelongsToGetAssociationMixin } from 'sequelize'
+import { sequelize } from '../util/db'
+import UserRole from './UserRole'
 
 export class User extends Model {
     declare id: number
     declare username: string
     declare passwordHash: string
+    declare getUserRole: BelongsToGetAssociationMixin<UserRole>
 }
 
 User.init({

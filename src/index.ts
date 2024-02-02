@@ -10,6 +10,12 @@ const app = express();
 const port = 3000;
 
 const start = async () => {
+  // check that .env is correctly setup
+  if (!process.env.SECRET) {
+    console.error('ERROR: SECRET is not set in dotenv.');
+    process.exit(1);
+  }
+
 
   // set up Apollo Server
   const apollo = new ApolloServer({
