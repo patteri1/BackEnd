@@ -4,7 +4,7 @@ import cors from 'cors'
 import { expressMiddleware } from '@apollo/server/express4'
 
 import { schema } from './graphql/schema'
-import { connectToDatabase, initializeRoles, sequelize } from './util/db'
+import { connectToDatabase, initializeAdminUser, initializeRoles, sequelize } from './util/db'
 
 const app = express();
 const port = 3000;
@@ -16,6 +16,10 @@ const start = async () => {
     process.exit(1);
   }
 
+  if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+    console.error('ERROR: ADMIN_USERNAME or ADMIN_PASSWORD is not set in dotenv.');
+    process.exit(1);
+  }
 
   // set up Apollo Server
   const apollo = new ApolloServer({
@@ -34,6 +38,7 @@ const start = async () => {
   await connectToDatabase()
   await sequelize.sync() // create or update tables in the database to match model definitions
   await initializeRoles()
+  await initializeAdminUser()
 
   // start express
   app.listen(port, () => {
