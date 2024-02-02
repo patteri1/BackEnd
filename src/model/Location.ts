@@ -42,4 +42,6 @@ Location.init({
     timestamps: false,
 })
 
-Location.hasMany(Storage)
+Location.hasMany(Storage, { foreignKey: 'locationId' })
+Storage.belongsTo(Location)
+
