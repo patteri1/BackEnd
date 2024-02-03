@@ -6,6 +6,7 @@ export class User extends Model {
     declare id: number
     declare username: string
     declare passwordHash: string
+    declare UserRoleId: number
     declare getUserRole: BelongsToGetAssociationMixin<UserRole>
 }
 

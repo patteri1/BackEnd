@@ -5,6 +5,7 @@ import { expressMiddleware } from '@apollo/server/express4'
 
 import { schema } from './graphql/schema'
 import { connectToDatabase, initializeAdminUser, initializeRoles, sequelize } from './util/db'
+import { createContext } from './graphql/context'
 
 const app = express();
 const port = 3000;
@@ -32,7 +33,7 @@ const start = async () => {
   // set up middleware
   app.use(cors());
   app.use(express.json())
-  app.use('/graphql', expressMiddleware(apollo))
+  app.use('/graphql', expressMiddleware(apollo, { context: createContext }))
 
   // set up database
   await connectToDatabase()

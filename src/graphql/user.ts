@@ -12,7 +12,7 @@ export const typeDef = `
   input AddUserInput {
     username: String!
     password: String!
-    roleId: Int!
+    UserRoleId: Int!
   }
 
   type AuthPayload {
@@ -23,7 +23,7 @@ export const typeDef = `
   type User {
     id: Int!
     username: String!
-    role: UserRole!
+    userRole: UserRole!
   }
 
   type UserRole {
@@ -35,35 +35,41 @@ export const typeDef = `
 interface AddUserInput {
 	username: string
 	password: string
-	roleId: number
+	UserRoleId: number
 }
 
 export const resolvers = {
 	Mutation: {
-		addUser: async (_: unknown, { input }: { input: AddUserInput }) => {
-			const { username, password, roleId } = input
+		addUser: async (_: unknown, { input }: { input: AddUserInput }, context: { user?: any }) => {
+			// check that the user has the admin role
+			// TODO: This could be improved
+			if (!context.user || context.user.UserRoleId !== 1) { 
+			  throw new Error('Invalid token');
+			}
+		  
+			const { username, password, UserRoleId } = input
 
 			// Hash the password
 			const saltRounds: number = 10
 			const passwordHash: string = await bcrypt.hash(password, saltRounds)
 
 			// find the role
-			const role = await UserRole.findByPk(roleId);
+			const role = await UserRole.findByPk(UserRoleId);
 			if (!role) {
-				throw new Error(`Role with ID ${roleId} not found`);
+				throw new Error(`Role with ID ${UserRoleId} not found`);
 			}
 
 			// Add new user to the database
 			const user: User = await User.create({
 				username,
 				passwordHash,
-				UserRoleId: roleId
+				UserRoleId: UserRoleId
 			})
 
 			return {
 				id: user.id,
 				username: user.username,
-				role: {
+				userRole: {
 					id: role.id,
 					name: role.name,
 				}
@@ -83,17 +89,20 @@ export const resolvers = {
 			}
 
 			// generate an authentication token
-			const secretKey: string = process.env.SECRET!
-			const token: string = jwt.sign({ userId: user.id, username: user.username }, secretKey, { expiresIn: '1h' })
+			const token: string = jwt.sign({ 
+				userId: user.id, 
+				username: user.username,
+				UserRoleId:  user.UserRoleId
+			}, process.env.SECRET!, { expiresIn: 60*60 }) // one hour
 
 			return {
 				token,
 				user: {
 					id: user.id,
 					username: user.username,
-					role: await user.getUserRole(),
+					userRole: await user.getUserRole(),
 				}
 			}
 		}
 	},
-};
+}
