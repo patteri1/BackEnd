@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
 import { Storage } from './Storage'
+import { Order } from './Order'
 
 export class Location extends Model {
     // type definitions
@@ -44,4 +45,7 @@ Location.init({
 
 Location.hasMany(Storage, { foreignKey: 'locationId' })
 Storage.belongsTo(Location)
+
+Location.hasMany(Order, { foreignKey: 'locationId' })
+Order.belongsTo(Location)
 
