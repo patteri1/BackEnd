@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
 import { Storage } from './Storage'
+import { OrderRow } from './OrderRow'
 
 export class PalletType extends Model {
     declare palletTypeId: number
@@ -29,3 +30,6 @@ PalletType.init({
 
 PalletType.hasMany(Storage, { foreignKey: 'palletTypeId' })
 Storage.belongsTo(PalletType)
+
+PalletType.hasMany(OrderRow, { foreignKey: 'palletTypeId' })
+OrderRow.belongsTo(PalletType)

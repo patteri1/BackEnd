@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
+import { OrderRow } from './OrderRow'
 
 export class Order extends Model {
     declare orderId: number
@@ -21,6 +22,8 @@ Order.init({
     modelName: 'order',
     timestamps: false,
 })
+
+Order.hasMany(OrderRow, { foreignKey: 'orderId' })
 
 
 
