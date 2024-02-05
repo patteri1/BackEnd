@@ -24,7 +24,4 @@ Order.init({
 })
 
 Order.hasMany(OrderRow, { foreignKey: 'orderId' })
-
-
-
-
+OrderRow.belongsTo(Order, { foreignKey: 'orderId' })

@@ -29,7 +29,7 @@ PalletType.init({
 });
 
 PalletType.hasMany(Storage, { foreignKey: 'palletTypeId' })
-Storage.belongsTo(PalletType)
+Storage.belongsTo(PalletType, { foreignKey: 'palletTypeId' })
 
 PalletType.hasMany(OrderRow, { foreignKey: 'palletTypeId' })
-OrderRow.belongsTo(PalletType)
+OrderRow.belongsTo(PalletType, { foreignKey: 'palletTypeId' })
