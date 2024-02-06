@@ -2,14 +2,14 @@ import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
 import { Storage } from './Storage'
 import { Order } from './Order'
+import { PostalCode } from './PostalCode'
 
 export class Location extends Model {
     // type definitions
     declare id: number
     declare name: string
     declare address: string
-    declare postalCode: string
-    declare city: string
+    declare postCode: string
     declare price: number
 }
 
@@ -27,10 +27,7 @@ Location.init({
     address: {
         type: DataTypes.STRING(128),
     },
-    postalCode: {
-        type: DataTypes.STRING(128),
-    },
-    city: {
+    postCode: {
         type: DataTypes.STRING(128),
     },
     price: {
@@ -48,4 +45,3 @@ Storage.belongsTo(Location, { foreignKey: 'locationId' })
 
 Location.hasMany(Order, { foreignKey: 'locationId' })
 Order.belongsTo(Location, { foreignKey: 'locationId' })
-
