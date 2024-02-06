@@ -5,6 +5,8 @@ import { expressMiddleware } from '@apollo/server/express4'
 
 import { schema } from './graphql/schema'
 import { connectToDatabase, sequelize } from './util/db'
+import { insertTestData } from './util/insertTestData'
+import { PalletType } from './model/PalletType'
 
 const app = express();
 const port = 3000;
@@ -26,7 +28,11 @@ const start = async () => {
 
   // connect and synchronise database
   await connectToDatabase()
-  sequelize.sync({force: true}) // create or update tables in the database to match model definitions
+  await sequelize.sync({ force: true }) // create or update tables in the database to match model definitions
+  await PalletType.sync();
+
+  // insert testdata
+  insertTestData()
 
   // start express
   app.listen(port, () => {
