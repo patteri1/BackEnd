@@ -6,7 +6,7 @@ import { expressMiddleware } from '@apollo/server/express4'
 import { schema } from './graphql/schema'
 import { connectToDatabase, sequelize } from './util/db'
 import { insertTestData } from './util/insertTestData'
-import { PostalCode } from './model/PostalCode'
+import { PostalCode, User } from './model/index'
 
 const app = express()
 const port = 3000
@@ -29,7 +29,6 @@ const start = async () => {
   // connect and synchronise database
   await connectToDatabase()
   await sequelize.sync({ force: true }) // create or update tables in the database to match model definitions
-  await PostalCode.sync()
 
   // insert testdata
   insertTestData()
