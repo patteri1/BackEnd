@@ -22,6 +22,3 @@ Order.init({
     modelName: 'order',
     timestamps: false,
 })
-
-Order.hasMany(OrderRow, { foreignKey: 'orderId' })
-OrderRow.belongsTo(Order, { foreignKey: 'orderId' })
