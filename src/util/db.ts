@@ -1,6 +1,10 @@
 import { Sequelize } from "sequelize";
 
-const sequelize = new Sequelize("postgres://postgres@localhost:5432/postgres")
+const sequelize = new Sequelize("postgres://postgres@localhost:5432/postgres", {
+    define: {
+        freezeTableName: true
+    }
+})
 
 const connectToDatabase = async () => {
     try {
