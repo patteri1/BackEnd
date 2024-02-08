@@ -5,9 +5,11 @@ import { expressMiddleware } from '@apollo/server/express4'
 
 import { schema } from './graphql/schema'
 import { connectToDatabase, sequelize } from './util/db'
+import { insertTestData } from './util/insertTestData'
+import { PostalCode, User } from './model/index'
 
-const app = express();
-const port = 3000;
+const app = express()
+const port = 3000
 
 const start = async () => {
 
@@ -20,19 +22,22 @@ const start = async () => {
   await apollo.start()
 
   // set up middleware
-  app.use(cors());
+  app.use(cors())
   app.use(express.json())
   app.use('/graphql', expressMiddleware(apollo))
 
   // connect and synchronise database
   await connectToDatabase()
-  sequelize.sync() // create or update tables in the database to match model definitions
+  await sequelize.sync({ force: true }) // create or update tables in the database to match model definitions
+
+  // insert testdata
+  insertTestData()
 
   // start express
   app.listen(port, () => {
-    console.log(`🚅 Express is running at http://localhost:${port}`);
-    console.log(`🚀 Apollo is running at http://localhost:${port}/graphql`);
-  });
+    console.log(`🚅 Express is running at http://localhost:${port}`)
+    console.log(`🚀 Apollo is running at http://localhost:${port}/graphql`)
+  })
 }
 
 start()
