@@ -5,7 +5,7 @@ export interface MyContext {
     user?: {
       userId: number;
       username: string;
-      UserRoleId: number;
+      userRoleId: number;
     };
 }
 

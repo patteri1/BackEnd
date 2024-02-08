@@ -2,7 +2,11 @@ import bcrypt from 'bcrypt'
 import { Sequelize } from "sequelize";
 import { User, UserRole } from "../model";
 
-const sequelize = new Sequelize("postgres://postgres@localhost:5432/postgres")
+const sequelize = new Sequelize("postgres://postgres@localhost:5432/postgres", {
+    define: {
+        freezeTableName: true
+    }
+})
 
 const connectToDatabase = async () => {
     try {
@@ -44,7 +48,7 @@ const initializeAdminUser = async () => {
     try {
         await User.findOrCreate({
             where: { username },
-            defaults: { username, passwordHash, UserRoleId: 1 },
+            defaults: { username, passwordHash, userRoleId: 1 },
         })
 
     } catch (error) {

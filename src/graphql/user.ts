@@ -12,7 +12,7 @@ export const typeDef = `
   input AddUserInput {
     username: String!
     password: String!
-    UserRoleId: Int!
+    userRoleId: Int!
   }
 
   type AuthPayload {
@@ -35,7 +35,7 @@ export const typeDef = `
 interface AddUserInput {
 	username: string
 	password: string
-	UserRoleId: number
+	userRoleId: number
 }
 
 export const resolvers = {
@@ -43,27 +43,27 @@ export const resolvers = {
 		addUser: async (_: unknown, { input }: { input: AddUserInput }, context: { user?: any }) => {
 			// check that the user has the admin role
 			// TODO: This could be improved
-			if (!context.user || context.user.UserRoleId !== 1) { 
-			  throw new Error('Invalid token');
+			if (!context.user || context.user.userRoleId !== 1) { 
+			  	throw new Error('Invalid token');
 			}
 		  
-			const { username, password, UserRoleId } = input
+			const { username, password, userRoleId } = input
 
 			// Hash the password
 			const saltRounds: number = 10
 			const passwordHash: string = await bcrypt.hash(password, saltRounds)
 
 			// find the role
-			const role = await UserRole.findByPk(UserRoleId);
+			const role = await UserRole.findByPk(userRoleId);
 			if (!role) {
-				throw new Error(`Role with ID ${UserRoleId} not found`);
+				throw new Error(`Role with ID ${userRoleId} not found`);
 			}
 
 			// Add new user to the database
 			const user: User = await User.create({
 				username,
 				passwordHash,
-				UserRoleId: UserRoleId
+				userRoleId: userRoleId
 			})
 
 			return {
@@ -92,7 +92,7 @@ export const resolvers = {
 			const token: string = jwt.sign({ 
 				userId: user.id, 
 				username: user.username,
-				UserRoleId:  user.UserRoleId
+				userRoleId:  user.userRoleId
 			}, process.env.SECRET!, { expiresIn: 60*60 }) // one hour
 
 			return {
