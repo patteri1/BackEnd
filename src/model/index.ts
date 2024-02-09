@@ -3,7 +3,6 @@ import { PostalCode } from './PostalCode'
 import { Order } from './Order'
 import { OrderRow } from './OrderRow'
 import { PalletType } from './PalletType'
-import { PostalCode } from './PostalCode'
 import { Storage } from './Storage'
 import { UserRole } from "./UserRole"
 import { User } from "./User"

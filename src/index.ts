@@ -44,7 +44,7 @@ const start = async () => {
   await initializeAdminUser()
   
   // insert testdata
-  insertTestData()
+  await insertTestData()
 
   // start express
   app.listen(port, () => {
