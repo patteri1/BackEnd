@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
+import { PalletType } from './PalletType'
 
 export class Storage extends Model {
     declare locationId: number

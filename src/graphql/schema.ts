@@ -7,9 +7,17 @@ import { typeDef as User, resolvers as userResolvers } from './user'
 // this is extended, fake empty field added as you cannot have an empty type
 const Query = `
     type Query {
-        _empty: String
+        locations: [Location]
+        location(id: ID): Location
+        storages: [Storage]
     }
 `
+const Mutation = `
+  type Mutation {
+    addAmountToStorage(locationId: Int!, amount: Int!): Storage
+    deleteAmountFromStorage(locationId: Int!, amount: Int!): Storage
+  }
+`;
 
 const Mutation = `
     type Mutation {
@@ -18,7 +26,11 @@ const Mutation = `
 `
 
 // resolvers from other files are merged to this
-const resolvers = {}
+const resolvers = {
+    Query: {},
+    Mutation: {}
+    
+}
 
 // put everything together and make the schema
 export const schema = makeExecutableSchema({
