@@ -3,29 +3,42 @@ import { PalletType } from '../model/PalletType';
 import { Storage } from '../model/Storage';
 import { Order } from '../model/Order';
 import { OrderRow } from '../model/OrderRow';
+import { PostalCode } from '../model/PostalCode'
 
 export const insertTestData = async () => {
     try {
+        const [postalCode1, postalCode2, postalCode3] = await Promise.all([
+            PostalCode.create({
+                postalCode: '12345',
+                city: 'City 1',
+            }),
+            PostalCode.create({
+                postalCode: '67890',
+                city: 'City 2'
+            }),
+            PostalCode.create({
+                postalCode: '67666',
+                city: 'City 3'
+            })
+        ])
+
         const [location1, location2] = await Promise.all([
             Location.create({
                 name: 'Kuljetusliike 1',
                 address: 'Address 1',
-                postalCode: '12345',
-                city: 'City 1',
+                postCode: postalCode1.postalCode,
                 price: 10.5,
             }),
             Location.create({
                 name: 'Kuljetusliike 2',
                 address: 'Address 2',
-                postalCode: '67890',
-                city: 'City 2',
+                postCode: postalCode2.postalCode,
                 price: 15.0,
             }),
             Location.create({
                 name: 'Käsittelylaitos 1',
                 address: 'Address 3',
-                postalCode: '67666',
-                city: 'City 3',
+                postCode: postalCode3.postalCode,
                 price: 0,
             }),
         ]);

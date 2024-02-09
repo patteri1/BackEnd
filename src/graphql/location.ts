@@ -1,8 +1,6 @@
-import { Location} from '../model/Location'
+import { Location } from "../model";
 import { Storage } from '../model/Storage'
 import { PalletType } from '../model/PalletType';
-
-
 
 export const typeDef = `
     extend type Query {
@@ -59,7 +57,7 @@ export const resolvers = {
                 return location;
 
             } catch (error) {
-                console.log(error);
+                console.log(error)
                 throw new Error(`Error retrieving location with ID ${id}`)
             }
         },
