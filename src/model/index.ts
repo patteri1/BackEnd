@@ -1,4 +1,5 @@
 import { Location } from './Location'
+import { PostalCode } from './PostalCode'
 import { Order } from './Order'
 import { OrderRow } from './OrderRow'
 import { PalletType } from './PalletType'

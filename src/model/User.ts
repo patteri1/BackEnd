@@ -6,7 +6,7 @@ export class User extends Model {
     declare id: number
     declare username: string
     declare passwordHash: string
-    declare UserRoleId: number
+    declare userRoleId: number
     declare getUserRole: BelongsToGetAssociationMixin<UserRole>
 }
 
@@ -27,7 +27,6 @@ User.init({
     }
 }, {
     sequelize,
+    modelName: 'user',
     timestamps: false,
 })
-
-export default User

@@ -19,7 +19,6 @@ UserRole.init({
     }
 }, {
     sequelize,
+    modelName: 'userRole',
     timestamps: false,
 })
-
-export default UserRole

@@ -21,6 +21,3 @@ PostalCode.init({
     modelName: 'postalCode',
     timestamps: false,
 })
-
-PostalCode.hasMany(Location, { foreignKey: 'postCode' })
-Location.belongsTo(PostalCode, { foreignKey: 'postCode' })
