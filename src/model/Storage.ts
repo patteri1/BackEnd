@@ -3,6 +3,7 @@ import { sequelize } from '../util/db'
 
 export class Storage extends Model {
     declare locationId: number
+    declare palletTypeId: number
     declare amount: number
 }
 
