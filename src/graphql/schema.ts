@@ -19,11 +19,7 @@ const Mutation = `
   }
 `;
 
-const Mutation = `
-    type Mutation {
-        _empty: String
-    }
-`
+
 
 // resolvers from other files are merged to this
 const resolvers = {
