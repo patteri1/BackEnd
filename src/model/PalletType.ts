@@ -5,7 +5,7 @@ import { OrderRow } from './OrderRow'
 
 export class PalletType extends Model {
     declare palletTypeId: number
-    declare locationId: number
+    declare product: string
     declare amount: number
 }
 

@@ -4,12 +4,12 @@ import { PalletType } from '../model/PalletType';
 
 
 
-
 export const typeDef = `
     extend type Query {
         location(id: Int!): Location
         allLocations: [Location]
         allStorages: [Storage]
+        allPalletTypes: [PalletType]
     } 
  
     type Location {
@@ -24,15 +24,16 @@ export const typeDef = `
 
     type Storage {
         locationId: Int!
+        palletTypeId: Int!
         amount: Int!
-        palletTypes: [PalletType!]
+        palletType: PalletType!
     }
 
     type PalletType {
         palletTypeId: Int!
-        locationId: Int!
         product: String
         amount: Int!
+        storages: [Storage]!
     }
 
     type Mutation {
@@ -47,7 +48,10 @@ export const resolvers = {
             const { id } = args
 
             try {
-                const location = await Location.findByPk(id, {include: 'storages'}) 
+                const location = await Location.findByPk(id, {include: [{
+                    model: Storage,
+                    include: [PalletType]
+                }]}) 
                 if (!location) {
                     throw new Error(`Location with ID ${id} not found`)
                 }
@@ -59,12 +63,13 @@ export const resolvers = {
                 throw new Error(`Error retrieving location with ID ${id}`)
             }
         },
+
         // get all locations
         allLocations: async () =>  { 
             try {
                 const allLocations = await Location.findAll({include: [{
                     model: Storage,
-                    include: [PalletType]
+                    include: [PalletType],
             }]})
 
                 return allLocations
@@ -82,6 +87,15 @@ export const resolvers = {
             } catch(error) {
                 console.log(error)
                 throw new Error('Error retrieving all storages')
+            }
+        },
+        allPalletTypes:async () => {
+            try{
+                const allPalletTypes = await PalletType.findAll()
+                return allPalletTypes
+            } catch(error) {
+                console.log(error)
+                throw new Error('error')
             }
         }
     },
@@ -117,19 +131,5 @@ export const resolvers = {
                     throw new Error(`Error deleting amount from storage with ID ${args.locationId}`)
                 }
             },
-            addToPallet: async (_: unknown, args: {palletTypeId: number, amount: number}) => {
-                try{
-                    const pallet = await PalletType.findByPk(args.palletTypeId)
-                    if (!pallet) {
-                        throw new Error(`Pallet with ID ${args.palletTypeId} not found`)
-                    }
-                    pallet.amount += args.amount
-                    await pallet.save()
-                    return pallet
-                }catch (error){
-                    console.log(error)
-                    throw new Error(`Error adding amount to pallet with ID ${args.palletTypeId}`)
-                }
-            }
         } 
     };

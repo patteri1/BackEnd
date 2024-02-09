@@ -16,7 +16,6 @@ const Mutation = `
   type Mutation {
     addAmountToStorage(locationId: Int!, amount: Int!): Storage
     deleteAmountFromStorage(locationId: Int!, amount: Int!): Storage
-    addToPallet(palletTypeId: Int!, amount: Int!): PalletType
   }
 `;
 
