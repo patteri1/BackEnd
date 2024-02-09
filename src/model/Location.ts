@@ -1,5 +1,8 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
+import { Storage } from './Storage'
+import { Order } from './Order'
+import { PostalCode } from './PostalCode'
 
 export class Location extends Model {
     // type definitions

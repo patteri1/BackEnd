@@ -22,5 +22,3 @@ UserRole.init({
     modelName: 'userRole',
     timestamps: false,
 })
-
-export default UserRole

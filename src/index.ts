@@ -5,6 +5,8 @@ import { expressMiddleware } from '@apollo/server/express4'
 
 import { schema } from './graphql/schema'
 import { connectToDatabase, initializeAdminUser, initializeRoles, sequelize } from './util/db'
+import { insertTestData } from './util/insertTestData'
+import { PostalCode, User } from './model/index'
 import { createContext } from './graphql/context'
 
 const app = express();
@@ -37,9 +39,12 @@ const start = async () => {
 
   // set up database
   await connectToDatabase()
-  await sequelize.sync() // create or update tables in the database to match model definitions
+  await sequelize.sync({ force: true }) // create or update tables in the database to match model definitions
   await initializeRoles()
   await initializeAdminUser()
+  
+  // insert testdata
+  insertTestData()
 
   // start express
   app.listen(port, () => {

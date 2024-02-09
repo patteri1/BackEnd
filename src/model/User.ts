@@ -1,6 +1,6 @@
 import { Model, DataTypes, BelongsToGetAssociationMixin } from 'sequelize'
 import { sequelize } from '../util/db'
-import UserRole from './UserRole'
+import { UserRole } from './UserRole'
 
 export class User extends Model {
     declare id: number
@@ -30,5 +30,3 @@ User.init({
     modelName: 'user',
     timestamps: false,
 })
-
-export default User

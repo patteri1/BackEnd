@@ -25,14 +25,14 @@ export const resolvers = {
             try {
                 const location = await Location.findByPk(id); // Use findByPk to find the location by its primary key (id)
                 if (!location) {
-                    throw new Error(`Location with ID ${id} not found`);
+                    throw new Error(`Location with ID ${id} not found`)
                 }
 
                 return location;
 
             } catch (error) {
                 console.log(error);
-                throw new Error(`Error retrieving location with ID ${id}`);
+                throw new Error(`Error retrieving location with ID ${id}`)
             }
         },
         // get all locations
