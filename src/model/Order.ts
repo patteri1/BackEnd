@@ -1,10 +1,13 @@
-import { Model, DataTypes } from 'sequelize'
+import { Model, DataTypes, BelongsToGetAssociationMixin } from 'sequelize'
 import { sequelize } from '../util/db'
-import { OrderRow } from './OrderRow'
+import { Location } from './Location'
 
 export class Order extends Model {
     declare orderId: number
     declare locationId: number
+    declare datetime: string
+    declare status: string
+    declare getLocation: BelongsToGetAssociationMixin<Location>
 }
 
 Order.init({
@@ -12,10 +15,15 @@ Order.init({
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-
     },
     locationId: {
         type: DataTypes.INTEGER,
+    },
+    datetime: {
+        type: DataTypes.STRING(20)
+    },
+    status: {
+        type: DataTypes.STRING(20)
     },
 }, {
     sequelize,

@@ -57,9 +57,13 @@ export const insertTestData = async () => {
         const [order1, order2] = await Promise.all([
             Order.create({
                 locationId: location1.id,
+                datetime: '05.02.2024',
+                status: 'Avattu'
             }),
             Order.create({
                 locationId: location2.id,
+                datetime: '16.12.2023',
+                status: 'Noudettu'
             }),
         ]);
 

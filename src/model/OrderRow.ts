@@ -1,10 +1,12 @@
-import { Model, DataTypes } from 'sequelize'
+import { Model, DataTypes, BelongsToGetAssociationMixin } from 'sequelize'
 import { sequelize } from '../util/db'
+import { Order } from './Order'
 
 export class OrderRow extends Model {
     declare orderId: number
     declare palletTypeId: number
     declare amount: number
+    declare getOrder: BelongsToGetAssociationMixin<Order>
 }
 
 OrderRow.init({

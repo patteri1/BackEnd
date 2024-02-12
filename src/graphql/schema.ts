@@ -3,6 +3,7 @@ import { merge } from 'lodash' // to merge resolver strings easier
 
 import { typeDef as Location, resolvers as locationResolvers } from './location'
 import { typeDef as User, resolvers as userResolvers } from './user'
+import { typeDef as Order, resolvers as orderResolvers } from './order'
 
 // this is extended, fake empty field added as you cannot have an empty type
 const Query = `
@@ -30,6 +31,6 @@ const resolvers = {
 
 // put everything together and make the schema
 export const schema = makeExecutableSchema({
-    typeDefs: [Query, Mutation, Location, User],
-    resolvers: merge(resolvers, locationResolvers, userResolvers),
+    typeDefs: [Query, Mutation, Location, User, Order],
+    resolvers: merge(resolvers, locationResolvers, userResolvers, orderResolvers),
 })
