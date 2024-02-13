@@ -54,15 +54,30 @@ export const insertTestData = async () => {
             }),
         ]);
 
-        const [order1, order2] = await Promise.all([
+        const [order1, order2, order3, order4, order5] = await Promise.all([
             Order.create({
                 locationId: location1.id,
+                datetime: '13.02.2024',
+                status: 'Avattu'
+            }),
+            Order.create({
+                locationId: location2.id,
                 datetime: '05.02.2024',
                 status: 'Avattu'
             }),
             Order.create({
                 locationId: location2.id,
-                datetime: '16.12.2023',
+                datetime: '16.01.2024',
+                status: 'Noudettu'
+            }),
+            Order.create({
+                locationId: location1.id,
+                datetime: '22.12.2023',
+                status: 'Peruttu'
+            }),
+            Order.create({
+                locationId: location1.id,
+                datetime: '11.12.2023',
                 status: 'Noudettu'
             }),
         ]);
@@ -87,6 +102,26 @@ export const insertTestData = async () => {
                 orderId: order2.orderId,
                 palletTypeId: palletType2.palletTypeId,
                 amount: 5,
+            }),
+            OrderRow.create({
+                orderId: order3.orderId,
+                palletTypeId: palletType1.palletTypeId,
+                amount: 6,
+            }),
+            OrderRow.create({
+                orderId: order4.orderId,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 40,
+            }),
+            OrderRow.create({
+                orderId: order5.orderId,
+                palletTypeId: palletType1.palletTypeId,
+                amount: 10,
+            }),
+            OrderRow.create({
+                orderId: order5.orderId,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 3,
             }),
             Storage.create({
                 locationId: location1.id,
