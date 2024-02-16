@@ -6,7 +6,6 @@ import { expressMiddleware } from '@apollo/server/express4'
 import { schema } from './graphql/schema'
 import { connectToDatabase, initializeAdminUser, initializeRoles, sequelize } from './util/db'
 import { insertTestData } from './util/insertTestData'
-import { PostalCode, User } from './model/index'
 import { createContext } from './graphql/context'
 
 const app = express();

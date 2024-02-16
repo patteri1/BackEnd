@@ -1,5 +1,4 @@
 import { Location } from './Location'
-import { PostalCode } from './PostalCode'
 import { Order } from './Order'
 import { OrderRow } from './OrderRow'
 import { PalletType } from './PalletType'
@@ -26,7 +25,4 @@ Storage.belongsTo(PalletType, { foreignKey: 'palletTypeId' })
 PalletType.hasMany(OrderRow, { foreignKey: 'palletTypeId' })
 OrderRow.belongsTo(PalletType, { foreignKey: 'palletTypeId' })
 
-PostalCode.hasMany(Location, { foreignKey: 'postCode' })
-Location.belongsTo(PostalCode, { foreignKey: 'postCode' })
-
-export { Location, Order, OrderRow, PalletType, Storage, PostalCode, User, UserRole }
+export { Location, Order, OrderRow, PalletType, Storage, User, UserRole }

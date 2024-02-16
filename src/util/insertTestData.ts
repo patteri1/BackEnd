@@ -1,45 +1,35 @@
-import { Location } from '../model/Location';
-import { PalletType } from '../model/PalletType';
-import { Storage } from '../model/Storage';
-import { Order } from '../model/Order';
-import { OrderRow } from '../model/OrderRow';
-import { PostalCode } from '../model/PostalCode'
+import { Location } from '../model/Location'
+import { PalletType } from '../model/PalletType'
+import { Storage } from '../model/Storage'
+import { Order } from '../model/Order'
+import { OrderRow } from '../model/OrderRow'
 
 export const insertTestData = async () => {
     try {
-        const [postalCode1, postalCode2, postalCode3] = await Promise.all([
-            PostalCode.create({
-                postalCode: '12345',
-                city: 'City 1',
-            }),
-            PostalCode.create({
-                postalCode: '67890',
-                city: 'City 2'
-            }),
-            PostalCode.create({
-                postalCode: '67666',
-                city: 'City 3'
-            })
-        ])
-
         const [location1, location2] = await Promise.all([
             Location.create({
                 name: 'Kuljetusliike 1',
                 address: 'Address 1',
-                postCode: postalCode1.postalCode,
+                postCode: '01600',
+                city: 'Vantaa',
                 price: 10.5,
+                locationType: 'Kuljetusliike'
             }),
             Location.create({
                 name: 'Kuljetusliike 2',
                 address: 'Address 2',
-                postCode: postalCode2.postalCode,
+                postCode: '33340',
+                city: 'Tampere',
                 price: 15.0,
+                locationType: 'Kuljetusliike'
             }),
             Location.create({
                 name: 'Käsittelylaitos 1',
                 address: 'Address 3',
-                postCode: postalCode3.postalCode,
+                postCode: '85500',
+                city: 'Nivala',
                 price: 0,
+                locationType: 'Käsittelylaitos'
             }),
         ]);
 
