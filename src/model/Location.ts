@@ -1,8 +1,5 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
-import { Storage } from './Storage'
-import { Order } from './Order'
-import { PostalCode } from './PostalCode'
 
 export class Location extends Model {
     // type definitions
@@ -10,7 +7,9 @@ export class Location extends Model {
     declare name: string
     declare address: string
     declare postCode: string
+    declare city: string
     declare price: number
+    declare locationType: string
 }
 
 // map Location class to a table in the database
@@ -30,9 +29,15 @@ Location.init({
     postCode: {
         type: DataTypes.STRING(128),
     },
+    city: {
+        type: DataTypes.STRING(128),
+    },
     price: {
         type: DataTypes.FLOAT,
         allowNull: false
+    },
+    locationType: {
+        type: DataTypes.STRING(128),
     },
 }, {
     sequelize,

@@ -14,9 +14,10 @@ export const typeDef = `
         id: Int!
         name: String!
         address: String!
-        postalCode: String!
         city: String!
+        postCode: String!
         price: Float!
+        locationType: String!
         storages: [Storage]!
     }
 
