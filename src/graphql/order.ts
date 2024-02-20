@@ -4,6 +4,7 @@ export const typeDef = `
     extend type Query {
         order(id: Int!): Order
         allOrders: [Order]
+        ordersByStatus(status: String!): [Order]
     }
 
     type Order {
@@ -63,6 +64,19 @@ export const resolvers = {
             } catch (error) {
                 console.log(error)
                 throw new Error('Error retrieving all orders ')
+            }
+        },
+        // get orders with a certain status
+        ordersByStatus: async (_: unknown, args: {status: String}) =>  { 
+            const { status } = args
+            try {
+                const orders = await Order.findAll({include: "location", where: { status: status }})
+
+                return orders
+
+            } catch (error) {
+                console.log(error)
+                throw new Error('Error retrieving orders by status')
             }
         }
     }
