@@ -1,10 +1,12 @@
+import { Op } from 'sequelize'
 import { Order, OrderRow } from '../model/'
 
 export const typeDef = `
     extend type Query {
         order(id: Int!): Order
         allOrders: [Order]
-        ordersByStatus(status: String!): [Order]
+        openOrders: [Order]
+        closedOrders: [Order]
     }
 
     type Order {
@@ -35,14 +37,16 @@ export const resolvers = {
             const { id } = args
 
             try {
-                const order = await Order.findByPk(id, {include: [
-                    "location", 
-                    {
-                        model: OrderRow, 
-                        where: { orderId: id }, 
-                        include: ["palletType"]
-                    }
-                ]})
+                const order = await Order.findByPk(id, {
+                    include: [
+                        'location', 
+                        {
+                            model: OrderRow, 
+                            where: { orderId: id }, 
+                            include: ['palletType']
+                        }
+                    ]
+                })
                 if (!order) {
                     throw new Error(`Order with ID ${id} not found`)
                 }
@@ -57,7 +61,9 @@ export const resolvers = {
         // get all orders (without rows)
         allOrders: async () =>  { 
             try {
-                const allOrders = await Order.findAll({include: "location"})
+                const allOrders = await Order.findAll({
+                    include: 'location'
+                })
 
                 return allOrders
 
@@ -66,17 +72,40 @@ export const resolvers = {
                 throw new Error('Error retrieving all orders ')
             }
         },
-        // get orders with a certain status
-        ordersByStatus: async (_: unknown, args: {status: String}) =>  { 
-            const { status } = args
+        // get all open orders (status Avattu)
+        openOrders: async () =>  { 
             try {
-                const orders = await Order.findAll({include: "location", where: { status: status }})
+                const orders = await Order.findAll({
+                    include: 'location', 
+                    where: { 
+                        status: 'Avattu' 
+                    }
+                })
 
                 return orders
 
             } catch (error) {
                 console.log(error)
-                throw new Error('Error retrieving orders by status')
+                throw new Error('Error retrieving open orders')
+            }
+        },
+        // get all closed orders (status Noudettu/Peruttu)
+        closedOrders: async () =>  { 
+            try {
+                const orders = await Order.findAll({
+                    include: 'location', 
+                    where: { 
+                        status: {
+                            [Op.or]: ['Noudettu', 'Peruttu']
+                        } 
+                    }
+                })
+
+                return orders
+
+            } catch (error) {
+                console.log(error)
+                throw new Error('Error retrieving open orders')
             }
         }
     }
