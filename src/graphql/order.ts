@@ -28,7 +28,23 @@ export const typeDef = `
         product: String
         amount: Int!
     }
+
+    extend type Mutation {
+        addOrder(input: AddOrderInput!): Order!
+    }
+
+    input AddOrderInput {
+        locationId: Int!
+        datetime: String
+        status: String
+    }
 `
+
+interface AddOrderInput {
+    locationId: number
+    datetime: string
+    status: string
+}
 
 export const resolvers = {
     Query: {
@@ -106,6 +122,35 @@ export const resolvers = {
             } catch (error) {
                 console.log(error)
                 throw new Error('Error retrieving open orders')
+            }
+        }
+    },
+    // todo:
+    // include order rows in addOrder
+    // change the data type of datetime
+    // add new order with timestamp
+    Mutation: {
+        addOrder: async (_: unknown, { input }: { input: AddOrderInput }) => {
+            try {
+                const { locationId, datetime, status } = input
+                const order: Order = await Order.create({
+                    locationId: locationId,
+                    datetime,
+                    status,
+                })
+
+                return {
+                    orderId: order.orderId,
+                    location: {
+                        id: locationId,
+                    },
+                    datetime: order.datetime,
+                    status: order.status
+                }
+
+            } catch (error) {
+                console.log(error)
+                throw new Error('Error adding new order')
             }
         }
     }
