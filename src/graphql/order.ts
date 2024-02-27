@@ -37,6 +37,12 @@ export const typeDef = `
         locationId: Int!
         datetime: String
         status: String
+        orderRows: [OrderRowInput]
+    }
+
+    input OrderRowInput {
+        palletTypeId: Int!
+        amount: Int!
     }
 `
 
@@ -44,6 +50,12 @@ interface AddOrderInput {
     locationId: number
     datetime: string
     status: string
+    orderRows: OrderRowInput[]
+}
+
+interface OrderRowInput {
+    palletTypeId: number
+    amount: number
 }
 
 export const resolvers = {
@@ -126,18 +138,26 @@ export const resolvers = {
         }
     },
     // todo:
-    // include order rows in addOrder
     // change the data type of datetime
     // add new order with timestamp
+    // add mutations deleteOrder and changeOrderStatus
     Mutation: {
         addOrder: async (_: unknown, { input }: { input: AddOrderInput }) => {
             try {
-                const { locationId, datetime, status } = input
+                const { locationId, datetime, status, orderRows } = input
                 const order: Order = await Order.create({
                     locationId: locationId,
                     datetime,
                     status,
                 })
+
+                // add rows
+                const rows = orderRows.map(rowInput => ({
+                    orderId: order.orderId,
+                    palletTypeId: rowInput.palletTypeId,
+                    amount: rowInput.amount
+                }))
+                await OrderRow.bulkCreate(rows)
 
                 return {
                     orderId: order.orderId,
@@ -145,7 +165,8 @@ export const resolvers = {
                         id: locationId,
                     },
                     datetime: order.datetime,
-                    status: order.status
+                    status: order.status,
+                    orderRows: rows // todo fix: returns orderRows as null in Apollo, even though they get successfully saved in the db
                 }
 
             } catch (error) {
