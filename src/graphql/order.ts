@@ -12,7 +12,7 @@ export const typeDef = `
     type Order {
         orderId: Int!
         location: Location!
-        datetime: String
+        createdAt: String
         status: String
         orderRows: [OrderRow]
     }
@@ -35,7 +35,7 @@ export const typeDef = `
 
     input AddOrderInput {
         locationId: Int!
-        datetime: String
+        createdAt: String
         status: String
         orderRows: [OrderRowInput]
     }
@@ -48,7 +48,7 @@ export const typeDef = `
 
 interface AddOrderInput {
     locationId: number
-    datetime: string
+    createdAt: string
     status: string
     orderRows: OrderRowInput[]
 }
@@ -144,10 +144,10 @@ export const resolvers = {
     Mutation: {
         addOrder: async (_: unknown, { input }: { input: AddOrderInput }) => {
             try {
-                const { locationId, datetime, status, orderRows } = input
+                const { locationId, createdAt, status, orderRows } = input
                 const order: Order = await Order.create({
                     locationId: locationId,
-                    datetime,
+                    createdAt,
                     status,
                 })
 
@@ -163,8 +163,9 @@ export const resolvers = {
                     orderId: order.orderId,
                     location: {
                         id: locationId,
+                        
                     },
-                    datetime: order.datetime,
+                    createdAt: order.createdAt,
                     status: order.status,
                     orderRows: rows // todo fix: returns orderRows as null in Apollo, even though they get successfully saved in the db
                 }

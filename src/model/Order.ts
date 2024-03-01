@@ -5,8 +5,8 @@ import { Location } from './Location'
 export class Order extends Model {
     declare orderId: number
     declare locationId: number
-    declare datetime: string
     declare status: string
+    declare createdAt: string
     declare getLocation: BelongsToGetAssociationMixin<Location>
 }
 
@@ -19,14 +19,13 @@ Order.init({
     locationId: {
         type: DataTypes.INTEGER,
     },
-    datetime: {
-        type: DataTypes.STRING(20)
-    },
     status: {
         type: DataTypes.STRING(20)
     },
 }, {
     sequelize,
     modelName: 'order',
-    timestamps: false,
+    timestamps: true,
+    updatedAt: true,
+    createdAt: true
 })
