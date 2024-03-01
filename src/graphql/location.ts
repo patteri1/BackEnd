@@ -16,9 +16,15 @@ export const typeDef = `
         address: String!
         city: String!
         postCode: String!
-        price: Float!
+        locationPrices: [LocationPrice]!
         locationType: String!
         storages: [Storage]!
+    }
+
+    type LocationPrice {
+        locationPriceId: Int!
+        price: Float!
+        transactionTime: String!
     }
 
     type Storage {
@@ -26,6 +32,7 @@ export const typeDef = `
         palletTypeId: Int!
         amount: Int!
         palletType: PalletType!
+        transactionTime: String!
     }
 
     type PalletType {

@@ -1,5 +1,5 @@
 import { Op } from 'sequelize'
-import { Location, PalletType } from '../model';
+import { Location, LocationPrice, PalletType, Storage } from '../model';
 import { createDailyReports } from './util/reportUtils';
 
 export const typeDef: string = `
@@ -77,7 +77,16 @@ export const resolvers = {
                     id: {
                         [Op.in]: locationIds
                     }
-                }
+                },
+                include: [
+                    {
+                        model: LocationPrice,
+                    },
+                    {
+                        model: Storage,
+                        include: [PalletType]
+                    }
+                ]
             })
 
             const startDate: Date = new Date(args.input.startDate)
