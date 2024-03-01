@@ -1,23 +1,18 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
-import { PalletType } from './PalletType'
 
 export class Storage extends Model {
     declare locationId: number
     declare palletTypeId: number
     declare amount: number
+    declare transactionTime: string
 }
 
 Storage.init({
-    locationId: {
+    storageId: {
         type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true,
-
-    },
-    palletTypeId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-
     },
     amount: {
         type: DataTypes.INTEGER,
@@ -26,9 +21,7 @@ Storage.init({
 }, {
     sequelize,
     modelName: 'storage',
-    timestamps: false,
+    timestamps: true,
+    updatedAt: false,
+    createdAt: 'transactionTime'
 })
-
-
-
-

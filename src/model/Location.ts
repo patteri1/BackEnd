@@ -8,7 +8,6 @@ export class Location extends Model {
     declare address: string
     declare postCode: string
     declare city: string
-    declare price: number
     declare locationType: string
 }
 
@@ -31,10 +30,6 @@ Location.init({
     },
     city: {
         type: DataTypes.STRING(128),
-    },
-    price: {
-        type: DataTypes.FLOAT,
-        allowNull: false
     },
     locationType: {
         type: DataTypes.STRING(128),

@@ -3,16 +3,17 @@ import { PalletType } from '../model/PalletType'
 import { Storage } from '../model/Storage'
 import { Order } from '../model/Order'
 import { OrderRow } from '../model/OrderRow'
+import { LocationPrice } from '../model'
 
 export const insertTestData = async () => {
     try {
-        const [location1, location2] = await Promise.all([
+        
+        const [location1, location2, location3] = await Promise.all([
             Location.create({
                 name: 'Kuljetusliike 1',
                 address: 'Address 1',
                 postCode: '01600',
                 city: 'Vantaa',
-                price: 10.5,
                 locationType: 'Kuljetusliike'
             }),
             Location.create({
@@ -20,7 +21,6 @@ export const insertTestData = async () => {
                 address: 'Address 2',
                 postCode: '33340',
                 city: 'Tampere',
-                price: 15.0,
                 locationType: 'Kuljetusliike'
             }),
             Location.create({
@@ -28,8 +28,37 @@ export const insertTestData = async () => {
                 address: 'Address 3',
                 postCode: '85500',
                 city: 'Nivala',
-                price: 0,
                 locationType: 'Käsittelylaitos'
+            }),
+        ]);
+
+        await Promise.all([
+            LocationPrice.create({
+                locationId: location1.id,
+                price: 50.95
+            }),
+            LocationPrice.create({
+                locationId: location2.id,
+                price: 89.75
+            }),
+            LocationPrice.create({
+                locationId: location3.id,
+                price: 120.20
+            }),
+            LocationPrice.create({
+                locationId: location1.id,
+                price: 50.40,
+                transactionTime: '2024-02-22 12:30:42.160+00'
+            }),
+            LocationPrice.create({
+                locationId: location1.id,
+                price: 67.40,
+                transactionTime: '2024-03-14 11:30:42.160+00'
+            }),
+            LocationPrice.create({
+                locationId: location1.id,
+                price: 30.40,
+                transactionTime: '2024-03-29 12:30:42.160+00'
             }),
         ]);
 
@@ -113,17 +142,49 @@ export const insertTestData = async () => {
                 palletTypeId: palletType2.palletTypeId,
                 amount: 3,
             }),
+        ]);
+
+        await Promise.all([
             Storage.create({
                 locationId: location1.id,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 20,
+                transactionTime: '2024-02-25 16:33:39.175+00'
             }),
+
+            Storage.create({
+                locationId: location1.id,
+                palletTypeId: palletType1.palletTypeId,
+                amount: 60,
+                transactionTime: '2024-03-16 14:55:42.100+00'
+            }),
+
+            Storage.create({
+                locationId: location1.id,
+                palletTypeId: palletType1.palletTypeId,
+                amount: 70,
+                transactionTime: '2024-03-24 20:01:55.162+00'
+            }),
+
+            Storage.create({
+                locationId: location1.id,
+                palletTypeId: palletType1.palletTypeId,
+                amount: 50,
+                transactionTime: '2024-04-01 09:06:20.162+00'
+            }),
+
             Storage.create({
                 locationId: location2.id,
                 palletTypeId: palletType2.palletTypeId,
                 amount: 35,
             }),
-        ]);
+
+            Storage.create({
+                locationId: location3.id,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 90,
+            }),
+        ])
 
         console.log('Test data inserted successfully!');
     } catch (error) {
