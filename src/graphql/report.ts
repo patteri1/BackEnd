@@ -1,4 +1,6 @@
-import { Location } from "../model";
+import { Op } from 'sequelize'
+import { Location, PalletType } from '../model';
+import { createDailyReports } from './util/reportUtils';
 
 export const typeDef: string = `
     extend type Query {
@@ -6,8 +8,8 @@ export const typeDef: string = `
     }
 
     input ReportInput {
-        startTime: String!
-        endTime: String!
+        startDate: String!
+        endDate: String!
         locationIds: [Int]!
     }
 
@@ -29,15 +31,15 @@ export const typeDef: string = `
     }
 
     type ProductReport {
-        product: String!
+        product: PalletType!
         palletAmount: Int!
-        totalCost: Int!
+        cost: Int!
     }
 `
 
-interface ReportInput {
-    startTime: string
-    endTime: string
+export interface ReportInput {
+    startDate: string
+    endDate: string
     locationIds: number[]
 }
 
@@ -45,31 +47,66 @@ interface Report {
     locationReports: LocationReport[]
 }
 
-interface LocationReport {
+export interface LocationReport {
     location: Location
     dailyReports: DailyReport[]
     totalCost: number
 }
 
-interface DailyReport {
+export interface DailyReport {
     date: string
     productReports: ProductReport[]
     totalDailyPallets: number
     totalDailyCost: number
 }
 
-interface ProductReport {
-    product: string
+export interface ProductReport {
+    product: PalletType
     palletAmount: number
-    totalCost: number
+    cost: number
 }
-  
+
 export const resolvers = {
     Query: {
         report: async (_: unknown, args: { input: ReportInput }): Promise<Report> => {
 
+            // fetch matching ids specified in the query
+            const { locationIds } = args.input
+            const locations: Location[] = await Location.findAll({
+                where: {
+                    id: {
+                        [Op.in]: locationIds
+                    }
+                }
+            })
+
+            const startDate: Date = new Date(args.input.startDate)
+            const endDate: Date = new Date(args.input.endDate)
+
+            // go through all locations
+            const locationReportPromises = locations.map(async (location) => {
+
+                // create a daily report for each date
+                let dailyReports: DailyReport[] = await createDailyReports(startDate, endDate, location)
+
+                // calculate total cost for the location
+                const totalCost = dailyReports.reduce((total, report) => total + report.totalDailyCost, 0);
+
+                // create location report
+                const locationReport: LocationReport = {
+                    location: location,
+                    dailyReports: dailyReports,
+                    totalCost: totalCost
+                }
+                
+                return locationReport
+            })
+
+            const locationReports: LocationReport[] = await Promise.all(locationReportPromises)
+
+            // create return report
             const report: Report = {
-                locationReports: []
+                locationReports: locationReports
             }
 
             return report
