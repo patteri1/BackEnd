@@ -1,5 +1,6 @@
 import { Op } from 'sequelize'
 import { Order, OrderRow } from '../model/'
+import { orderBy } from 'lodash'
 
 export const typeDef = `
     extend type Query {
@@ -7,6 +8,11 @@ export const typeDef = `
         allOrders: [Order]
         openOrders: [Order]
         closedOrders: [Order]
+    }
+    
+    extend type Mutation {
+        addOrder(input: AddOrderInput!): Order!
+        updateOrderStatus(id: Int!, newStatus: String!): Order
     }
 
     type Order {
@@ -27,10 +33,6 @@ export const typeDef = `
         palletTypeId: Int!
         product: String
         amount: Int!
-    }
-
-    extend type Mutation {
-        addOrder(input: AddOrderInput!): Order!
     }
 
     input AddOrderInput {
@@ -133,14 +135,10 @@ export const resolvers = {
 
             } catch (error) {
                 console.log(error)
-                throw new Error('Error retrieving open orders')
+                throw new Error('Error retrieving closed orders')
             }
         }
     },
-    // todo:
-    // change the data type of datetime
-    // add new order with timestamp
-    // add mutations deleteOrder and changeOrderStatus
     Mutation: {
         addOrder: async (_: unknown, { input }: { input: AddOrderInput }) => {
             try {
@@ -173,6 +171,23 @@ export const resolvers = {
             } catch (error) {
                 console.log(error)
                 throw new Error('Error adding new order')
+            }
+        },
+        updateOrderStatus: async (_: unknown, args: { id: number, newStatus: string }) => {
+            const { id, newStatus } = args
+
+            try {
+                const order = await Order.findByPk(id)
+                if (!order) {
+                    throw new Error(`Order with ID ${id} not found`)
+                }
+                order.status = newStatus
+                await order.save()
+                return order
+
+            } catch (error) {
+                console.log(error);
+                throw new Error(`Error updating order status. orderId: ${id}`)
             }
         }
     }
