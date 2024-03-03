@@ -1,6 +1,5 @@
 import { Op } from 'sequelize'
 import { Order, OrderRow } from '../model/'
-import { orderBy } from 'lodash'
 
 export const typeDef = `
     extend type Query {
@@ -9,7 +8,7 @@ export const typeDef = `
         openOrders: [Order]
         closedOrders: [Order]
     }
-    
+
     extend type Mutation {
         addOrder(input: AddOrderInput!): Order!
         updateOrderStatus(id: Int!, newStatus: String!): Order
@@ -37,7 +36,6 @@ export const typeDef = `
 
     input AddOrderInput {
         locationId: Int!
-        createdAt: String
         status: String
         orderRows: [OrderRowInput]
     }
@@ -50,7 +48,6 @@ export const typeDef = `
 
 interface AddOrderInput {
     locationId: number
-    createdAt: string
     status: string
     orderRows: OrderRowInput[]
 }
@@ -142,10 +139,9 @@ export const resolvers = {
     Mutation: {
         addOrder: async (_: unknown, { input }: { input: AddOrderInput }) => {
             try {
-                const { locationId, createdAt, status, orderRows } = input
+                const { locationId, status, orderRows } = input
                 const order: Order = await Order.create({
                     locationId: locationId,
-                    createdAt,
                     status,
                 })
 

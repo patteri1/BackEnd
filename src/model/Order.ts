@@ -22,6 +22,17 @@ Order.init({
     status: {
         type: DataTypes.STRING(20)
     },
+    createdAt: {
+        type: DataTypes.DATE,
+        get() {
+            const dateTime = new Date(`${this.dataValues.createdAt}`)
+            // todo: check if handles dst correctly
+            // also move this to utils
+            const date = dateTime.toLocaleDateString('fi-FI', {timeZone: 'Europe/Helsinki'}) // dd.mm.yyyy
+            const time = dateTime.toLocaleTimeString('en-GB', {timeZone: 'Europe/Helsinki'}) // hh:mm:ss
+            return `${date} ${time}`
+        }
+    }
 }, {
     sequelize,
     modelName: 'order',
