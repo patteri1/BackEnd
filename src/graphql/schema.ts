@@ -17,21 +17,22 @@ const Query = `
 `
 const Mutation = `
   type Mutation {
-    addAmountToStorage(locationId: Int!, amount: Int!): Storage
-    deleteAmountFromStorage(locationId: Int!, amount: Int!): Storage
+    setAmountToStorage(locationId: Int!, palletTypeId: Int!, amount: Int!): Storage
+    setAmountForPalletType(palletTypeId: Int!, amount: Int!): PalletType
+    addPalletTypeToLocation(locationId: Int!, palletTypeId: Int!, amount: Int!): Storage
   }
 `
 
 
 // resolvers from other files are merged to this
 const resolvers = {
-    Query: {},
-    Mutation: {}
-    
+  Query: {},
+  Mutation: {}
+
 }
 
 // put everything together and make the schema
 export const schema = makeExecutableSchema({
-    typeDefs: [Query, Mutation, Location, User, Order, Storage, PalletType],
-    resolvers: merge(resolvers, locationResolvers, userResolvers, orderResolvers, storageResolvers, palletTypeResolvers),
+  typeDefs: [Query, Mutation, Location, User, Order, Storage, PalletType],
+  resolvers: merge(resolvers, locationResolvers, userResolvers, orderResolvers, storageResolvers, palletTypeResolvers),
 })

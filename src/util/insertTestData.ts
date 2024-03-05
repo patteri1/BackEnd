@@ -8,24 +8,25 @@ export const insertTestData = async () => {
     try {
         const [location1, location2] = await Promise.all([
             Location.create({
-                name: 'Kuljetusliike 1',
-                address: 'Address 1',
+                name: 'Kuljetus Korhonen',
+                address: 'Pihatie 7',
                 postCode: '01600',
                 city: 'Vantaa',
                 price: 10.5,
                 locationType: 'Kuljetusliike'
             }),
+
             Location.create({
-                name: 'Kuljetusliike 2',
-                address: 'Address 2',
+                name: 'Jorin kuljetus Oy',
+                address: 'Mäkipolku 3',
                 postCode: '33340',
                 city: 'Tampere',
                 price: 15.0,
                 locationType: 'Kuljetusliike'
             }),
             Location.create({
-                name: 'Käsittelylaitos 1',
-                address: 'Address 3',
+                name: 'Käsittelylaitos',
+                address: 'Käsittelytie 4',
                 postCode: '85500',
                 city: 'Nivala',
                 price: 0,

@@ -88,26 +88,85 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
+
+
     },
     Mutation: {
-        updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
+        setAmountToStorage: async (_: unknown, args: { locationId: number, palletTypeId: number, amount: number }) => {
             try {
-                console.log(locationId)
-                const locationToUpdate = await Location.findByPk(locationId)
-                if (!locationToUpdate) {
-                    throw new Error('Location not found')
+                console.log('Updating amount in storage for Location ID:', args.locationId, 'and PalletType ID:', args.palletTypeId);
+
+                const storage = await Storage.findOne({
+                    where: {
+                        locationId: args.locationId,
+                        palletTypeId: args.palletTypeId,
+                    },
+                });
+
+                if (!storage) {
+                    throw new Error(`Storage with Location ID ${args.locationId} and PalletType ID ${args.palletTypeId} not found`);
                 }
-                Object.assign(locationToUpdate, input)
-                await locationToUpdate.save();
-                return locationToUpdate
+
+                storage.amount = args.amount;
+                await storage.save();
+
+                console.log('Successfully updated amount in storage:', storage);
+
+                return storage;
             } catch (error) {
-                if (error instanceof Error) {
-                    throw new Error(`Failed to update location: ${error.message}`)
-                } else {
-                    throw new Error(`Failed to update location with ID ${locationId}: Unknown error`)
-                }
+                console.error(error);
+                throw new Error(`Error updating amount in storage for Location ID ${args.locationId} and PalletType ID ${args.palletTypeId}`);
             }
         },
-    },
+        setAmountForPalletType: async (_: unknown, args: { palletTypeId: number, amount: number }) => {
+            try {
+                const palletType = await PalletType.findByPk(args.palletTypeId)
+                if (!palletType) {
+                    throw new Error(`PalletType with ID ${args.palletTypeId} not found`)
+                }
+                palletType.amount = args.amount
+                await palletType.save()
 
+
+                return palletType
+            } catch (error) {
+                console.error(error)
+                throw new Error(`Error adding amount for palletType ${args.palletTypeId}`)
+            }
+        },
+
+        addStorageToLocation: async (_: unknown, args: { locationId: number, palletTypeId: number, amount: number }) => {
+            try {
+                const location = await Location.findByPk(args.locationId);
+                const palletType = await PalletType.findByPk(args.palletTypeId);
+
+                if (!location || !palletType) {
+                    throw new Error(`Location or PalletType not found`);
+                }
+
+                const existingStorage = await Storage.findOne({
+                    where: {
+                        locationId: args.locationId,
+                        palletTypeId: args.palletTypeId,
+                    },
+                });
+
+                if (existingStorage) {
+                    throw new Error(`PalletType already exists for this Location`);
+                }
+
+                const newStorage = await Storage.create({
+                    locationId: args.locationId,
+                    palletTypeId: args.palletTypeId,
+                    amount: args.amount,
+                });
+
+                return newStorage;
+            } catch (error) {
+                console.error(error);
+                throw new Error(`Error adding Storage to Location`);
+            }
+        },
+
+    }
 };
