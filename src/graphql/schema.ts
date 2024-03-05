@@ -18,7 +18,6 @@ const Query = `
 const Mutation = `
   type Mutation {
     setAmountToStorage(locationId: Int!, palletTypeId: Int!, amount: Int!): Storage
-    setAmountForPalletType(palletTypeId: Int!, amount: Int!): PalletType
     addPalletTypeToLocation(locationId: Int!, palletTypeId: Int!, amount: Int!): Storage
   }
 `

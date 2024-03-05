@@ -19,6 +19,8 @@ export const typeDef = `
 
     extend type Mutation {
         updateLocation(locationId: Int!, input: LocationInput!): Location
+        addStorageToLocation(locationId: Int!, palletTypeId: Int!, amount: Int!): Location
+        
     }
  
     type Location {
@@ -92,46 +94,23 @@ export const resolvers = {
 
     },
     Mutation: {
-        setAmountToStorage: async (_: unknown, args: { locationId: number, palletTypeId: number, amount: number }) => {
+
+        updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
             try {
-                console.log('Updating amount in storage for Location ID:', args.locationId, 'and PalletType ID:', args.palletTypeId);
-
-                const storage = await Storage.findOne({
-                    where: {
-                        locationId: args.locationId,
-                        palletTypeId: args.palletTypeId,
-                    },
-                });
-
-                if (!storage) {
-                    throw new Error(`Storage with Location ID ${args.locationId} and PalletType ID ${args.palletTypeId} not found`);
+                console.log(locationId)
+                const locationToUpdate = await Location.findByPk(locationId)
+                if (!locationToUpdate) {
+                    throw new Error('Location not found')
                 }
-
-                storage.amount = args.amount;
-                await storage.save();
-
-                console.log('Successfully updated amount in storage:', storage);
-
-                return storage;
+                Object.assign(locationToUpdate, input)
+                await locationToUpdate.save();
+                return locationToUpdate
             } catch (error) {
-                console.error(error);
-                throw new Error(`Error updating amount in storage for Location ID ${args.locationId} and PalletType ID ${args.palletTypeId}`);
-            }
-        },
-        setAmountForPalletType: async (_: unknown, args: { palletTypeId: number, amount: number }) => {
-            try {
-                const palletType = await PalletType.findByPk(args.palletTypeId)
-                if (!palletType) {
-                    throw new Error(`PalletType with ID ${args.palletTypeId} not found`)
+                if (error instanceof Error) {
+                    throw new Error(`Failed to update location: ${error.message}`)
+                } else {
+                    throw new Error(`Failed to update location with ID ${locationId}: Unknown error`)
                 }
-                palletType.amount = args.amount
-                await palletType.save()
-
-
-                return palletType
-            } catch (error) {
-                console.error(error)
-                throw new Error(`Error adding amount for palletType ${args.palletTypeId}`)
             }
         },
 
