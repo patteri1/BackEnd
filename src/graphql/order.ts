@@ -11,7 +11,8 @@ export const typeDef = `
 
     extend type Mutation {
         addOrder(input: AddOrderInput!): Order!
-        updateOrderStatus(id: Int!, newStatus: String!): Order
+        collectOrder(id: Int!): Order
+        cancelOrder(id: Int!): Order
     }
 
     type Order {
@@ -153,6 +154,8 @@ export const resolvers = {
                 }))
                 await OrderRow.bulkCreate(rows)
 
+                // todo: reduce pallets from original location's storage
+
                 return {
                     orderId: order.orderId,
                     location: {
@@ -169,21 +172,64 @@ export const resolvers = {
                 throw new Error('Error adding new order')
             }
         },
-        updateOrderStatus: async (_: unknown, args: { id: number, newStatus: string }) => {
-            const { id, newStatus } = args
+        // mark order as collected
+        collectOrder: async (_: unknown, args: { id: number }) => {
+            const { id } = args
 
             try {
-                const order = await Order.findByPk(id)
+                const order = await Order.findByPk(id, {
+                    include: [
+                        'location', 
+                        {
+                            model: OrderRow, 
+                            where: { orderId: id }, 
+                            include: ['palletType']
+                        }
+                    ]
+                })
                 if (!order) {
                     throw new Error(`Order with ID ${id} not found`)
                 }
-                order.status = newStatus
+                order.status = 'Noudettu'
                 await order.save()
+
+                // todo: add ordered pallets to new location's storage
+                
                 return order
 
             } catch (error) {
                 console.log(error);
-                throw new Error(`Error updating order status. orderId: ${id}`)
+                throw new Error(`Error collecting order ${id}`)
+            }
+        },
+        // mark order as cancelled
+        cancelOrder: async (_: unknown, args: { id: number }) => {
+            const { id } = args
+
+            try {
+                const order = await Order.findByPk(id, {
+                    include: [
+                        'location', 
+                        {
+                            model: OrderRow, 
+                            where: { orderId: id }, 
+                            include: ['palletType']
+                        }
+                    ]
+                })
+                if (!order) {
+                    throw new Error(`Order with ID ${id} not found`)
+                }
+                order.status = 'Peruttu'
+                await order.save()
+
+                // todo: return pallets to original location's storage
+                
+                return order
+
+            } catch (error) {
+                console.log(error);
+                throw new Error(`Error cancelling order ${id}`)
             }
         }
     }
