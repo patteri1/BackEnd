@@ -10,21 +10,28 @@ export const insertTestData = async () => {
         
         const [location1, location2, location3] = await Promise.all([
             Location.create({
-                name: 'Kuljetusliike 1',
+                name: 'Kuljetus Korhonen',
                 address: 'Address 1',
                 postCode: '01600',
                 city: 'Vantaa',
                 locationType: 'Kuljetusliike'
             }),
             Location.create({
-                name: 'Kuljetusliike 2',
+                name: 'Lahtisen Logistiikka',
                 address: 'Address 2',
                 postCode: '33340',
                 city: 'Tampere',
                 locationType: 'Kuljetusliike'
             }),
             Location.create({
-                name: 'Käsittelylaitos 1',
+                name: 'Lähettipalvelu Lehtonen',
+                address: 'Address 2',
+                postCode: '33340',
+                city: 'Tampere',
+                locationType: 'Kuljetusliike'
+            }),
+            Location.create({
+                name: 'Akkukäsittely',
                 address: 'Address 3',
                 postCode: '85500',
                 city: 'Nivala',
@@ -34,31 +41,39 @@ export const insertTestData = async () => {
 
         await Promise.all([
             LocationPrice.create({
-                locationId: location1.id,
-                price: 50.95
+                locationId: location1.locationId,
+                price: 50.95,
+                validFrom: '2024-01-01',
             }),
             LocationPrice.create({
-                locationId: location2.id,
-                price: 89.75
-            }),
-            LocationPrice.create({
-                locationId: location3.id,
-                price: 120.20
-            }),
-            LocationPrice.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 price: 50.40,
-                transactionTime: '2024-02-22 12:30:42.160+00'
+                validFrom: '2024-01-15',
             }),
             LocationPrice.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 price: 67.40,
-                transactionTime: '2024-03-14 11:30:42.160+00'
+                validFrom: '2024-01-20',
             }),
             LocationPrice.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 price: 30.40,
-                transactionTime: '2024-03-29 12:30:42.160+00'
+                validFrom: '2024-01-25',
+            }),
+            LocationPrice.create({
+                locationId: location1.locationId,
+                price: 30.40,
+                validFrom: '2024-01-31',
+            }),
+            LocationPrice.create({
+                locationId: location2.locationId,
+                price: 89.75,
+                validFrom: '2024-01-01',
+            }),
+            LocationPrice.create({
+                locationId: location3.locationId,
+                price: 120.20,
+                validFrom: '2024-01-01',
             }),
         ]);
 
@@ -71,31 +86,35 @@ export const insertTestData = async () => {
                 product: 'Litiumlaatikko',
                 amount: 5,
             }),
+            PalletType.create({
+                product: 'Pahvilaatikko',
+                amount: 100,
+            }),
         ]);
 
         const [order1, order2, order3, order4, order5] = await Promise.all([
             Order.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 datetime: '13.02.2024',
                 status: 'Avattu'
             }),
             Order.create({
-                locationId: location2.id,
+                locationId: location2.locationId,
                 datetime: '05.02.2024',
                 status: 'Avattu'
             }),
             Order.create({
-                locationId: location2.id,
+                locationId: location2.locationId,
                 datetime: '16.01.2024',
                 status: 'Noudettu'
             }),
             Order.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 datetime: '22.12.2023',
                 status: 'Peruttu'
             }),
             Order.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 datetime: '11.12.2023',
                 status: 'Noudettu'
             }),
@@ -146,41 +165,41 @@ export const insertTestData = async () => {
 
         await Promise.all([
             Storage.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 20,
                 transactionTime: '2024-02-25 16:33:39.175+00'
             }),
 
             Storage.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 60,
                 transactionTime: '2024-03-16 14:55:42.100+00'
             }),
 
             Storage.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 70,
                 transactionTime: '2024-03-24 20:01:55.162+00'
             }),
 
             Storage.create({
-                locationId: location1.id,
+                locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 50,
                 transactionTime: '2024-04-01 09:06:20.162+00'
             }),
 
             Storage.create({
-                locationId: location2.id,
+                locationId: location2.locationId,
                 palletTypeId: palletType2.palletTypeId,
                 amount: 35,
             }),
 
             Storage.create({
-                locationId: location3.id,
+                locationId: location3.locationId,
                 palletTypeId: palletType2.palletTypeId,
                 amount: 90,
             }),

@@ -18,10 +18,12 @@ LocationPrice.init({
         type: DataTypes.FLOAT,
         allowNull: false
     },
+    validFrom: {
+        type: DataTypes.DATEONLY,
+        allowNull: false
+    },
 }, {
     sequelize,
     modelName: 'locationPrice',
-    timestamps: true,
-    updatedAt: false,
-    createdAt: 'transactionTime'
+    timestamps: false,
 })

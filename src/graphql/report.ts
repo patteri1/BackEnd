@@ -1,6 +1,7 @@
-import { Op } from 'sequelize'
 import { Location, LocationPrice, PalletType, Storage } from '../model';
 import { createDailyReports } from './util/reportUtils';
+import { sequelize } from '../util/db';
+import { Op, QueryTypes } from 'sequelize';
 
 export const typeDef: string = `
     extend type Query {
@@ -31,7 +32,7 @@ export const typeDef: string = `
     }
 
     type ProductReport {
-        product: PalletType!
+        palletType: PalletType!
         palletAmount: Int!
         cost: Int!
     }
@@ -61,7 +62,7 @@ export interface DailyReport {
 }
 
 export interface ProductReport {
-    product: PalletType
+    palletType: PalletType
     palletAmount: number
     cost: number
 }
@@ -70,27 +71,55 @@ export const resolvers = {
     Query: {
         report: async (_: unknown, args: { input: ReportInput }): Promise<Report> => {
 
+            const startDate: Date = new Date(args.input.startDate)
+            const endDate: Date = new Date(args.input.endDate)
+
             // fetch matching ids specified in the query
             const { locationIds } = args.input
+
+            // Fetch matching locations specified in the query
             const locations: Location[] = await Location.findAll({
                 where: {
-                    id: {
+                    locationId: {
                         [Op.in]: locationIds
                     }
                 },
                 include: [
                     {
-                        model: LocationPrice,
-                    },
-                    {
                         model: Storage,
                         include: [PalletType]
                     }
                 ]
+            });
+            
+            // get relevant prices for the date range
+            const query: string = ` 
+                SELECT * 
+                FROM "locationPrice" 
+                WHERE "locationId" IN(:locationIds) AND (
+                    "validFrom" = (SELECT MAX("validFrom") FROM "locationPrice" 
+                                        WHERE "locationId" = 1 AND "validFrom" < :startDate)
+                    OR 
+                    ("validFrom" >= :startDate AND "validFrom" <= :endDate) 
+                );
+            `
+            
+            const locationPrices: LocationPrice[] = await sequelize.query(query, {
+                    replacements: { locationIds: locationIds, startDate: startDate, endDate: endDate },
+                    type: QueryTypes.SELECT
             })
 
-            const startDate: Date = new Date(args.input.startDate)
-            const endDate: Date = new Date(args.input.endDate)
+            // add prices to their respective locations
+            locationPrices.forEach(locationPrice => {
+                const location = locations.find(location => location.locationId === locationPrice.locationId);
+                if (location) {
+                    if (!location.locationPrices) {
+                        location.locationPrices = [];
+                    }
+                    location.locationPrices.push(locationPrice);
+                }
+            })
+             
 
             // go through all locations
             const locationReportPromises = locations.map(async (location) => {

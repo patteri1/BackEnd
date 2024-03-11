@@ -11,7 +11,7 @@ export const typeDef = `
     } 
  
     type Location {
-        id: Int!
+        locationId: Int!
         name: String!
         address: String!
         city: String!
@@ -24,7 +24,7 @@ export const typeDef = `
     type LocationPrice {
         locationPriceId: Int!
         price: Float!
-        transactionTime: String!
+        validFrom: String!
     }
 
     type Storage {
