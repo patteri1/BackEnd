@@ -92,19 +92,30 @@ export const resolvers = {
                 ]
             });
             
-            // get relevant prices for the date range
-            const query: string = ` 
-                SELECT * 
-                FROM "locationPrice" 
-                WHERE "locationId" IN(:locationIds) AND (
-                    "validFrom" = (SELECT MAX("validFrom") FROM "locationPrice" 
-                                        WHERE "locationId" = 1 AND "validFrom" < :startDate)
-                    OR 
-                    ("validFrom" >= :startDate AND "validFrom" <= :endDate) 
-                );
-            `
+            // get valid prices for the date range
+            const priceQuery: string = ` 
+            -- Prices that are valid at on start date
+            SELECT "lp"."locationPriceId", "lp"."price", "lp"."validFrom", "lp"."locationId"
+            FROM "locationPrice" "lp"
+            WHERE "lp"."validFrom" = (
+                SELECT MAX("lp2"."validFrom")
+                FROM "locationPrice" "lp2"
+                WHERE "lp2"."validFrom" <= :startDate
+                AND "lp2"."locationId" = "lp"."locationId"
+            )
+            AND "lp"."locationId" IN (:locationIds)
             
-            const locationPrices: LocationPrice[] = await sequelize.query(query, {
+            UNION
+            
+            -- Price changes within the date range
+            SELECT "lp"."locationPriceId", "lp"."price", "lp"."validFrom", "lp"."locationId"
+            FROM "locationPrice" "lp"
+            WHERE "lp"."validFrom" >= :startDate
+            AND "lp"."validFrom" <= :endDate
+            AND "lp"."locationId" IN (:locationIds);
+            `
+
+            const locationPrices: LocationPrice[] = await sequelize.query(priceQuery, {
                     replacements: { locationIds: locationIds, startDate: startDate, endDate: endDate },
                     type: QueryTypes.SELECT
             })

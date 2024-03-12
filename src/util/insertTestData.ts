@@ -77,7 +77,7 @@ export const insertTestData = async () => {
             }),
         ]);
 
-        const [palletType1, palletType2] = await Promise.all([
+        const [palletType1, palletType2, palletType3] = await Promise.all([
             PalletType.create({
                 product: 'Paristolaatikko',
                 amount: 30,
@@ -168,28 +168,84 @@ export const insertTestData = async () => {
                 locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 20,
-                transactionTime: '2024-02-25 16:33:39.175+00'
+                transactionTime: '2023-12-28 16:33:39.175+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 60,
-                transactionTime: '2024-03-16 14:55:42.100+00'
+                transactionTime: '2024-01-01 14:55:42.100+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 70,
-                transactionTime: '2024-03-24 20:01:55.162+00'
+                transactionTime: '2024-01-24 20:01:55.162+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
                 palletTypeId: palletType1.palletTypeId,
                 amount: 50,
-                transactionTime: '2024-04-01 09:06:20.162+00'
+                transactionTime: '2024-02-01 09:06:20.162+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 2,
+                transactionTime: '2023-12-28 16:33:39.175+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 3,
+                transactionTime: '2024-01-01 14:55:42.100+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 0,
+                transactionTime: '2024-01-24 20:01:55.162+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 1,
+                transactionTime: '2024-02-01 09:06:20.162+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType3.palletTypeId,
+                amount: 2,
+                transactionTime: '2023-12-30 16:33:39.175+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType3.palletTypeId,
+                amount: 6,
+                transactionTime: '2024-01-03 14:55:42.100+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType3.palletTypeId,
+                amount: 1,
+                transactionTime: '2024-01-15 20:01:55.162+00'
+            }),
+
+            Storage.create({
+                locationId: location1.locationId,
+                palletTypeId: palletType3.palletTypeId,
+                amount: 2,
+                transactionTime: '2024-01-31 09:06:20.162+00'
             }),
 
             Storage.create({
