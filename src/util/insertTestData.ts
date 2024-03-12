@@ -251,13 +251,16 @@ export const insertTestData = async () => {
             Storage.create({
                 locationId: location2.locationId,
                 palletTypeId: palletType2.palletTypeId,
-                amount: 35,
+                amount: 3,
+                transactionTime: '2023-12-28 16:33:39.175+00'
             }),
 
             Storage.create({
                 locationId: location3.locationId,
-                palletTypeId: palletType2.palletTypeId,
-                amount: 90,
+                palletTypeId: palletType3.palletTypeId,
+                amount: 1,
+                transactionTime: '2023-12-28 16:33:39.175+00'
+
             }),
         ])
 

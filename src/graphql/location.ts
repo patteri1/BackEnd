@@ -28,6 +28,7 @@ export const typeDef = `
     }
 
     type Storage {
+        storageId: Int!
         locationId: Int!
         palletTypeId: Int!
         amount: Int!

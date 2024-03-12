@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
 import { LocationPrice } from './LocationPrice'
+import { Storage } from './Storage'
 
 export class Location extends Model {
     // type definitions
@@ -11,6 +12,7 @@ export class Location extends Model {
     declare city: string
     declare locationType: string
     declare locationPrices: LocationPrice[]
+    declare storages: Storage[]
 }
 
 // map Location class to a table in the database

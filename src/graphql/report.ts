@@ -74,27 +74,19 @@ export const resolvers = {
             const startDate: Date = new Date(args.input.startDate)
             const endDate: Date = new Date(args.input.endDate)
 
-            // fetch matching ids specified in the query
+            // Fetch locations specified in the query by id
             const { locationIds } = args.input
-
-            // Fetch matching locations specified in the query
             const locations: Location[] = await Location.findAll({
                 where: {
                     locationId: {
                         [Op.in]: locationIds
                     }
                 },
-                include: [
-                    {
-                        model: Storage,
-                        include: [PalletType]
-                    }
-                ]
             });
             
             // get valid prices for the date range
             const priceQuery: string = ` 
-            -- Prices that are valid at on start date
+            -- Prices that are valid on start date
             SELECT "lp"."locationPriceId", "lp"."price", "lp"."validFrom", "lp"."locationId"
             FROM "locationPrice" "lp"
             WHERE "lp"."validFrom" = (
@@ -111,7 +103,7 @@ export const resolvers = {
             SELECT "lp"."locationPriceId", "lp"."price", "lp"."validFrom", "lp"."locationId"
             FROM "locationPrice" "lp"
             WHERE "lp"."validFrom" >= :startDate
-            AND "lp"."validFrom" <= :endDate
+            AND "lp"."validFrom" <= :endDate --Price can change only at start of day time 00:00:00
             AND "lp"."locationId" IN (:locationIds);
             `
 
@@ -130,7 +122,49 @@ export const resolvers = {
                     location.locationPrices.push(locationPrice);
                 }
             })
-             
+           
+            // get valid storages for date range
+            const storageQuery: string = `
+          	    -- Storages that are valid on start date
+		        SELECT "s"."storageId", "s"."amount", "s"."transactionTime", "s"."locationId", "s"."palletTypeId"
+		        FROM "storage" "s"
+		        WHERE ("s"."locationId", "s"."palletTypeId", "s"."transactionTime") IN (
+    		        SELECT "s2"."locationId", "s2"."palletTypeId", MAX("s2"."transactionTime")
+    		        FROM "storage" "s2"
+    		        WHERE "s2"."transactionTime" <= :startDate
+    		        AND "s2"."locationId" IN (:locationIds)
+    		        GROUP BY "s2"."locationId", "s2"."palletTypeId"
+		        )
+	
+		        UNION
+
+		        -- Storage changes within the date range
+		        SELECT "s"."storageId", "s"."amount", "s"."transactionTime", "s"."locationId", "s"."palletTypeId"
+		        FROM "storage" "s"
+		        WHERE "s"."transactionTime" >= :startDate
+		        AND "s"."transactionTime" < :endDate
+		        AND "s"."locationId" IN (:locationIds);
+	        `
+
+            // use date after end date to get storages where transaction time is before midnight on end date
+            let d: Date = new Date(endDate)
+            d.setDate(d.getDate() + 1)
+
+            const storages: Storage[] = await sequelize.query(storageQuery, {
+                replacements: { locationIds: locationIds, startDate: startDate, endDate: d  },
+                type: QueryTypes.SELECT
+            })
+
+            // add prices to their respective locations
+            storages.forEach(storage => {
+                const location = locations.find(location => location.locationId === storage.locationId);
+                if (location) {
+                    if (!location.storages) {
+                        location.storages = [];
+                    }
+                    location.storages.push(storage);
+                }
+            })
 
             // go through all locations
             const locationReportPromises = locations.map(async (location) => {
