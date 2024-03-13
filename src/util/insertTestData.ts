@@ -6,7 +6,7 @@ import { OrderRow } from '../model/OrderRow'
 
 export const insertTestData = async () => {
     try {
-        const [location1, location2] = await Promise.all([
+        const [location1, location2, location3] = await Promise.all([
             Location.create({
                 name: 'Kuljetus Korhonen',
                 address: 'Pihatie 7',
@@ -123,6 +123,16 @@ export const insertTestData = async () => {
                 locationId: location2.id,
                 palletTypeId: palletType2.palletTypeId,
                 amount: 35,
+            }),
+            Storage.create({
+                locationId: location3.id,
+                palletTypeId: palletType1.palletTypeId,
+                amount: 120,
+            }),
+            Storage.create({
+                locationId: location3.id,
+                palletTypeId: palletType2.palletTypeId,
+                amount: 65,
             }),
         ]);
 

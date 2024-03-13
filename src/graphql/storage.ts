@@ -1,9 +1,11 @@
 import { Storage } from '../model/Storage'
 import { PalletType } from '../model/PalletType';
+import { Location } from '../model';
 
 export const typeDef = `
     extend type Query {
         allStorages: [Storage]
+        availableStorages: [Storage]
     } 
 
     type Storage {
@@ -29,6 +31,24 @@ export const resolvers = {
                 throw new Error('Error retrieving all storages')
             }
         },
+        // storages available for ordering
+        availableStorages: async () => {
+            try {
+                const availableStorages = await Storage.findAll({
+                    include: [
+                        PalletType, 
+                        {
+                            model: Location, 
+                            where: { locationType: 'Käsittelylaitos' }
+                        }
+                    ]
+                })
+                return availableStorages
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error retrieving available pallets: ${error}`)
+            }
+        }
     },
     Mutation: {
         setAmountToStorage: async (_: unknown, args: { locationId: number, palletTypeId: number, amount: number }) => {
