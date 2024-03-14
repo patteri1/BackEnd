@@ -25,9 +25,6 @@ LocationPrice.belongsTo(Location, {
     }
 })
 
-Location.hasMany(Storage, { foreignKey: 'locationId'})
-Storage.belongsTo(Location, { foreignKey: 'locationId'})
-
 Location.hasMany(Order, { foreignKey: 'locationId' })
 Order.belongsTo(Location, { foreignKey: 'locationId' })
 

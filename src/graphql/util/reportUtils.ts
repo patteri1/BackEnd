@@ -37,7 +37,7 @@ async function createProductReports(location: Location, date: Date, palletTypes:
     // create a product report for each pallet type (product)
     palletTypes.map((palletType: PalletType) => {
         const productReport: ProductReport = {
-            product: palletType,
+            palletType: palletType,
             palletAmount: 5, // PLACEHOLDER
             cost: 25, // PLACEHOLDER
         }

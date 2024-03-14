@@ -5,7 +5,7 @@ export class LocationPrice extends Model {
     declare locationPriceId: number
     declare locationId: number
     declare price: number
-    declare transactionTime: string
+    declare validFrom: string
 }
 
 LocationPrice.init({

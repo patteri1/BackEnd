@@ -4,8 +4,8 @@ import { sequelize } from '../util/db'
 export class Storage extends Model {
     declare locationId: number
     declare palletTypeId: number
-    declare amount: number
-    declare transactionTime: string
+    declare palletAmount: number
+    declare createdAt: string
 }
 
 Storage.init({
@@ -14,7 +14,7 @@ Storage.init({
         autoIncrement: true,
         primaryKey: true,
     },
-    amount: {
+    palletAmount: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
@@ -22,6 +22,6 @@ Storage.init({
     sequelize,
     modelName: 'storage',
     timestamps: true,
-    updatedAt: false,
-    createdAt: 'transactionTime'
+    updatedAt: true,
+    createdAt: true
 })

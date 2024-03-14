@@ -67,10 +67,10 @@ export const resolvers = {
 			})
 
 			return {
-				id: user.id,
+				id: user.userId,
 				username: user.username,
 				userRole: {
-					id: role.id,
+					id: role.userRoleId,
 					name: role.name,
 				}
 			}
@@ -90,7 +90,7 @@ export const resolvers = {
 
 			// generate an authentication token
 			const token: string = jwt.sign({ 
-				userId: user.id, 
+				userId: user.userId, 
 				username: user.username,
 				userRoleId:  user.userRoleId
 			}, process.env.SECRET!, { expiresIn: 60*60 }) // one hour
@@ -98,7 +98,7 @@ export const resolvers = {
 			return {
 				token,
 				user: {
-					id: user.id,
+					id: user.userId,
 					username: user.username,
 					userRole: await user.getUserRole(),
 				}
