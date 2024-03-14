@@ -1,12 +1,12 @@
-import { PalletType } from '../model/PalletType';
+import { Product } from '../model/Product'
 
 export const typeDef = `
     extend type Query {
-        allPalletTypes: [PalletType]
+        allProducts: [Product]
     } 
 
-    type PalletType {
-        palletTypeId: Int!
+    type Product {
+        productId: Int!
         productName: String
         productAmount: Int!
         storages: [Storage]!
@@ -14,14 +14,14 @@ export const typeDef = `
 `
 export const resolvers = {
     Query: {
-        allPalletTypes: async () => {
+        allProducts: async () => {
             try {
-                const allPalletTypes = await PalletType.findAll()
-                return allPalletTypes
+                const allProducts = await Product.findAll()
+                return allProducts
             } catch (error) {
                 console.log(error)
                 throw new Error('error')
             }
         },
     },
-};
+}

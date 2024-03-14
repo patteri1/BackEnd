@@ -1,5 +1,5 @@
 import { Storage } from '../model/Storage'
-import { PalletType } from '../model/PalletType';
+import { Product } from '../model/Product';
 
 export const typeDef = `
     extend type Query {
@@ -7,14 +7,16 @@ export const typeDef = `
     } 
 
     type Storage {
+        storageId: Int!
         locationId: Int!
-        palletTypeId: Int!
+        productId: Int!
         palletAmount: Int!
-        palletType: PalletType!
+        product: Product!
+        createdAt: String
     }
 
     extend type Mutation {
-        setAmountToStorage(locationId: Int!, palletTypeId: Int!, palletAmount: Int!): Storage
+        setAmountToStorage(locationId: Int!, productId: Int!, palletAmount: Int!): Storage
     }
 `
 
@@ -22,7 +24,7 @@ export const resolvers = {
     Query: {
         allStorages: async () => {
             try {
-                const allStorages = await Storage.findAll({ include: PalletType })
+                const allStorages = await Storage.findAll({ include: Product })
                 return allStorages
             } catch (error) {
                 console.log(error)
@@ -31,19 +33,25 @@ export const resolvers = {
         },
     },
     Mutation: {
-        setAmountToStorage: async (_: unknown, args: { locationId: number, palletTypeId: number, palletAmount: number }) => {
+        setAmountToStorage: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number }) => {
             try {
-                console.log('Updating palletAmount in storage for Location ID:', args.locationId, 'and PalletType ID:', args.palletTypeId);
+                console.log('Updating palletAmount in storage for Location ID:', args.locationId, 'and Product ID:', args.productId);
+
+                // todo fix: this is probably very broken due to db changes.
+
+                // add a condition? 
+                // if a storage row for the wanted product and current date (createdAt)
+                // already exists, use storage.save(), if not, use storage.create()
 
                 const storage = await Storage.findOne({
                     where: {
                         locationId: args.locationId,
-                        palletTypeId: args.palletTypeId,
+                        productId: args.productId,
                     },
                 });
 
                 if (!storage) {
-                    throw new Error(`Storage with Location ID ${args.locationId} and PalletType ID ${args.palletTypeId} not found`);
+                    throw new Error(`Storage with Location ID ${args.locationId} and Product ID ${args.productId} not found`);
                 }
 
                 storage.palletAmount = args.palletAmount;
@@ -54,7 +62,7 @@ export const resolvers = {
                 return storage;
             } catch (error) {
                 console.error(error);
-                throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId} and PalletType ID ${args.palletTypeId}`);
+                throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId} and Product ID ${args.productId}`);
             }
         },
     }

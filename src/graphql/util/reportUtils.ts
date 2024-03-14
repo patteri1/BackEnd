@@ -1,11 +1,11 @@
 import { DailyReport, ProductReport } from "../report";
-import { Location, PalletType } from "../../model";
+import { Location, Product } from "../../model";
 
 export async function createDailyReports(startDate: Date, endDate: Date, location: Location): Promise<DailyReport[]> {
     let dailyReports: DailyReport[] = [];
     
     // get all pallet types (different products)
-    const palletTypes: PalletType[] = await PalletType.findAll()
+    const products: Product[] = await Product.findAll()
 
     
 
@@ -13,7 +13,7 @@ export async function createDailyReports(startDate: Date, endDate: Date, locatio
     for(let d: Date = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
         
         // get product reports
-        const productReports: ProductReport[] = await createProductReports(location, d, palletTypes)
+        const productReports: ProductReport[] = await createProductReports(location, d, products)
         
         // calculate daily pallets and cost
         const totalDailyPallets = productReports.reduce((total, report) => total + report.palletAmount, 0);
@@ -31,13 +31,13 @@ export async function createDailyReports(startDate: Date, endDate: Date, locatio
     return dailyReports
 }
 
-async function createProductReports(location: Location, date: Date, palletTypes: PalletType[]): Promise<ProductReport[]> {
+async function createProductReports(location: Location, date: Date, products: Product[]): Promise<ProductReport[]> {
     let productReports: ProductReport[] = []
 
     // create a product report for each pallet type (product)
-    palletTypes.map((palletType: PalletType) => {
+    products.map((product: Product) => {
         const productReport: ProductReport = {
-            palletType: palletType,
+            product: product,
             palletAmount: 5, // PLACEHOLDER
             cost: 25, // PLACEHOLDER
         }

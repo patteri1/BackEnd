@@ -3,7 +3,7 @@ import { Order, OrderRow } from '../model/'
 
 export const typeDef = `
     extend type Query {
-        order(id: Int!): Order
+        order(orderId: Int!): Order
         allOrders: [Order]
         openOrders: [Order]
         closedOrders: [Order]
@@ -11,8 +11,8 @@ export const typeDef = `
 
     extend type Mutation {
         addOrder(input: AddOrderInput!): Order!
-        collectOrder(id: Int!): Order
-        cancelOrder(id: Int!): Order
+        collectOrder(orderId: Int!): Order
+        cancelOrder(orderId: Int!): Order
     }
 
     type Order {
@@ -25,14 +25,14 @@ export const typeDef = `
 
     type OrderRow {
         order: Order!
-        palletType: PalletType!
-        amount: Int!
+        product: Product!
+        palletAmount: Int!
     }
 
-    type PalletType {
-        palletTypeId: Int!
-        product: String
-        amount: Int!
+    type Product {
+        productId: Int!
+        productName: String
+        productAmount: Int!
     }
 
     input AddOrderInput {
@@ -42,8 +42,8 @@ export const typeDef = `
     }
 
     input OrderRowInput {
-        palletTypeId: Int!
-        amount: Int!
+        productId: Int!
+        palletAmount: Int!
     }
 `
 
@@ -54,36 +54,36 @@ interface AddOrderInput {
 }
 
 interface OrderRowInput {
-    palletTypeId: number
-    amount: number
+    productId: number
+    palletAmount: number
 }
 
 export const resolvers = {
     Query: {
         // get order by id
-        order: async (_: unknown, args: { id: number }) => {
-            const { id } = args
+        order: async (_: unknown, args: { orderId: number }) => {
+            const { orderId } = args
 
             try {
-                const order = await Order.findByPk(id, {
+                const order = await Order.findByPk(orderId, {
                     include: [
                         'location', 
                         {
                             model: OrderRow, 
-                            where: { orderId: id }, 
-                            include: ['palletType']
+                            where: { orderId: orderId }, 
+                            include: ['product']
                         }
                     ]
                 })
                 if (!order) {
-                    throw new Error(`Order with ID ${id} not found`)
+                    throw new Error(`Order with ID ${orderId} not found`)
                 }
 
                 return order
 
             } catch (error) {
                 console.log(error);
-                throw new Error(`Error retrieving order with ID ${id}`)
+                throw new Error(`Error retrieving order with ID ${orderId}`)
             }
         },
         // get all orders (without rows)
@@ -149,8 +149,8 @@ export const resolvers = {
                 // add rows
                 const rows = orderRows.map(rowInput => ({
                     orderId: order.orderId,
-                    palletTypeId: rowInput.palletTypeId,
-                    amount: rowInput.amount
+                    productId: rowInput.productId,
+                    palletAmount: rowInput.palletAmount
                 }))
                 await OrderRow.bulkCreate(rows)
 
@@ -159,7 +159,7 @@ export const resolvers = {
                 return {
                     orderId: order.orderId,
                     location: {
-                        id: locationId,
+                        locationId: locationId,
                         
                     },
                     createdAt: order.createdAt,
@@ -173,22 +173,22 @@ export const resolvers = {
             }
         },
         // mark order as collected
-        collectOrder: async (_: unknown, args: { id: number }) => {
-            const { id } = args
+        collectOrder: async (_: unknown, args: { orderId: number }) => {
+            const { orderId } = args
 
             try {
-                const order = await Order.findByPk(id, {
+                const order = await Order.findByPk(orderId, {
                     include: [
                         'location', 
                         {
                             model: OrderRow, 
-                            where: { orderId: id }, 
-                            include: ['palletType']
+                            where: { orderId: orderId }, 
+                            include: ['product']
                         }
                     ]
                 })
                 if (!order) {
-                    throw new Error(`Order with ID ${id} not found`)
+                    throw new Error(`Order with ID ${orderId} not found`)
                 }
                 order.status = 'Noudettu'
                 await order.save()
@@ -199,26 +199,26 @@ export const resolvers = {
 
             } catch (error) {
                 console.log(error);
-                throw new Error(`Error collecting order ${id}`)
+                throw new Error(`Error collecting order ${orderId}`)
             }
         },
         // mark order as cancelled
-        cancelOrder: async (_: unknown, args: { id: number }) => {
-            const { id } = args
+        cancelOrder: async (_: unknown, args: { orderId: number }) => {
+            const { orderId } = args
 
             try {
-                const order = await Order.findByPk(id, {
+                const order = await Order.findByPk(orderId, {
                     include: [
                         'location', 
                         {
                             model: OrderRow, 
-                            where: { orderId: id }, 
-                            include: ['palletType']
+                            where: { orderId: orderId }, 
+                            include: ['product']
                         }
                     ]
                 })
                 if (!order) {
-                    throw new Error(`Order with ID ${id} not found`)
+                    throw new Error(`Order with ID ${orderId} not found`)
                 }
                 order.status = 'Peruttu'
                 await order.save()
@@ -229,7 +229,7 @@ export const resolvers = {
 
             } catch (error) {
                 console.log(error);
-                throw new Error(`Error cancelling order ${id}`)
+                throw new Error(`Error cancelling order ${orderId}`)
             }
         }
     }

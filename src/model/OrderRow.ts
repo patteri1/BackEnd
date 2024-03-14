@@ -4,7 +4,7 @@ import { Order } from './Order'
 
 export class OrderRow extends Model {
     declare orderId: number
-    declare palletTypeId: number
+    declare productId: number
     declare palletAmount: number
     declare getOrder: BelongsToGetAssociationMixin<Order>
 }
@@ -14,7 +14,7 @@ OrderRow.init({
         type: DataTypes.INTEGER,
         primaryKey: true,
     },
-    palletTypeId: {
+    productId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
 

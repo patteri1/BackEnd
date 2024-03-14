@@ -1,5 +1,5 @@
 import { Location } from '../model/Location'
-import { PalletType } from '../model/PalletType'
+import { Product } from '../model/Product'
 import { Storage } from '../model/Storage'
 import { Order } from '../model/Order'
 import { OrderRow } from '../model/OrderRow'
@@ -10,22 +10,21 @@ export const insertTestData = async () => {
         
         const [location1, location2, location3] = await Promise.all([
             Location.create({
-                name: 'Kuljetus Korhonen',
+                locationName: 'Kuljetus Korhonen',
                 address: 'Pihatie 7',
                 postCode: '01600',
                 city: 'Vantaa',
                 locationType: 'Kuljetusliike'
             }),
-
             Location.create({
-                name: 'Jorin kuljetus Oy',
+                locationName: 'Jorin kuljetus Oy',
                 address: 'Mäkipolku 3',
                 postCode: '33340',
                 city: 'Tampere',
                 locationType: 'Kuljetusliike'
             }),
             Location.create({
-                name: 'Käsittelylaitos',
+                locationName: 'Käsittelylaitos',
                 address: 'Käsittelytie 4',
                 postCode: '85500',
                 city: 'Nivala',
@@ -71,16 +70,16 @@ export const insertTestData = async () => {
             }),
         ])
 
-        const [palletType1, palletType2, palletType3] = await Promise.all([
-            PalletType.create({
+        const [product1, product2, product3] = await Promise.all([
+            Product.create({
                 productName: 'Paristolaatikko',
                 productAmount: 30,
             }),
-            PalletType.create({
+            Product.create({
                 productName: 'Litiumlaatikko',
                 productAmount: 5,
             }),
-            PalletType.create({
+            Product.create({
                 productName: 'Pahvilaatikko',
                 productAmount: 100,
             }),
@@ -117,42 +116,42 @@ export const insertTestData = async () => {
         await Promise.all([
             OrderRow.create({
                 orderId: order1.orderId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 8,
             }),
             OrderRow.create({
                 orderId: order1.orderId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 4,
             }),
             OrderRow.create({
                 orderId: order2.orderId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 10,
             }),
             OrderRow.create({
                 orderId: order2.orderId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 5,
             }),
             OrderRow.create({
                 orderId: order3.orderId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 6,
             }),
             OrderRow.create({
                 orderId: order4.orderId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 40,
             }),
             OrderRow.create({
                 orderId: order5.orderId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 10,
             }),
             OrderRow.create({
                 orderId: order5.orderId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 3,
             }),
         ])
@@ -160,98 +159,98 @@ export const insertTestData = async () => {
         await Promise.all([
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 20,
                 createdAt: '2023-12-28 16:33:39.175+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 60,
                 createdAt: '2024-01-01 14:55:42.100+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 70,
                 createdAt: '2024-01-24 20:01:55.162+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType1.palletTypeId,
+                productId: product1.productId,
                 palletAmount: 50,
                 createdAt: '2024-02-01 09:06:20.162+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 2,
                 createdAt: '2023-12-28 16:33:39.175+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 3,
                 createdAt: '2024-01-01 14:55:42.100+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 0,
                 createdAt: '2024-01-24 20:01:55.162+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 1,
                 createdAt: '2024-02-01 09:06:20.162+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType3.palletTypeId,
+                productId: product3.productId,
                 palletAmount: 2,
                 createdAt: '2023-12-30 16:33:39.175+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType3.palletTypeId,
+                productId: product3.productId,
                 palletAmount: 6,
                 createdAt: '2024-01-03 14:55:42.100+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType3.palletTypeId,
+                productId: product3.productId,
                 palletAmount: 1,
                 createdAt: '2024-01-15 20:01:55.162+00'
             }),
 
             Storage.create({
                 locationId: location1.locationId,
-                palletTypeId: palletType3.palletTypeId,
+                productId: product3.productId,
                 palletAmount: 2,
                 createdAt: '2024-01-31 09:06:20.162+00'
             }),
 
             Storage.create({
                 locationId: location2.locationId,
-                palletTypeId: palletType2.palletTypeId,
+                productId: product2.productId,
                 palletAmount: 3,
                 createdAt: '2023-12-28 16:33:39.175+00'
             }),
 
             Storage.create({
                 locationId: location3.locationId,
-                palletTypeId: palletType3.palletTypeId,
+                productId: product3.productId,
                 palletAmount: 1,
                 createdAt: '2023-12-28 16:33:39.175+00'
 

@@ -6,7 +6,7 @@ import { Storage } from './Storage'
 export class Location extends Model {
     // type definitions
     declare locationId: number
-    declare name: string
+    declare locationName: string
     declare address: string
     declare postCode: string
     declare city: string
@@ -22,7 +22,7 @@ Location.init({
         autoIncrement: true,
         primaryKey: true,
     },
-    name: {
+    locationName: {
         type: DataTypes.STRING(128),
         allowNull: false,
     },

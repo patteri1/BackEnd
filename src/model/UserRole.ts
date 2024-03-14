@@ -3,7 +3,7 @@ import { sequelize} from '../util/db'
 
 export class UserRole extends Model {
     declare userRoleId: number
-    declare name: string
+    declare roleName: string
 }
 
 UserRole.init({
@@ -12,7 +12,7 @@ UserRole.init({
         autoIncrement: true,
         primaryKey: true,
     },
-    name: {
+    roleName: {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false,

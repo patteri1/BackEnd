@@ -24,7 +24,11 @@ User.init({
     passwordHash: {
         type: DataTypes.STRING(60),
         allowNull: false,
-    }
+    },
+    userRoleId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
 }, {
     sequelize,
     modelName: 'user',

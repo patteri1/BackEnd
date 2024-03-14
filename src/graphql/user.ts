@@ -21,14 +21,14 @@ export const typeDef = `
   }
 
   type User {
-    id: Int!
+    userId: Int!
     username: String!
     userRole: UserRole!
   }
 
   type UserRole {
-    id: Int!
-    name: String!
+    userRoleId: Int!
+    roleName: String!
   }
 `
 
@@ -67,11 +67,11 @@ export const resolvers = {
 			})
 
 			return {
-				id: user.userId,
+				userId: user.userId,
 				username: user.username,
 				userRole: {
-					id: role.userRoleId,
-					name: role.name,
+					userRoleId: role.userRoleId,
+					roleName: role.roleName,
 				}
 			}
 		},
@@ -98,7 +98,7 @@ export const resolvers = {
 			return {
 				token,
 				user: {
-					id: user.userId,
+					userId: user.userId,
 					username: user.username,
 					userRole: await user.getUserRole(),
 				}
