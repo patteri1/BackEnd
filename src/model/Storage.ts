@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
+import { formatDateTime } from '../util/datetimeUtils'
 
 export class Storage extends Model {
     declare storageId: number
@@ -7,6 +8,7 @@ export class Storage extends Model {
     declare productId: number
     declare palletAmount: number
     declare createdAt: string
+    declare updatedAt: string
 }
 
 Storage.init({
@@ -27,6 +29,18 @@ Storage.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    createdAt: {
+        type: DataTypes.DATE,
+        get() {
+            return formatDateTime(this.dataValues.createdAt)
+        }
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        get() {
+            return formatDateTime(this.dataValues.updatedAt)
+        }
+    }
 }, {
     sequelize,
     modelName: 'storage',

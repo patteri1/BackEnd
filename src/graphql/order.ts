@@ -19,6 +19,7 @@ export const typeDef = `
         orderId: Int!
         location: Location!
         createdAt: String
+        updatedAt: String
         status: String
         orderRows: [OrderRow]
     }

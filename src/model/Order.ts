@@ -1,12 +1,14 @@
 import { Model, DataTypes, BelongsToGetAssociationMixin } from 'sequelize'
 import { sequelize } from '../util/db'
 import { Location } from './Location'
+import { formatDateTime } from '../util/datetimeUtils'
 
 export class Order extends Model {
     declare orderId: number
     declare locationId: number
     declare status: string
     declare createdAt: string
+    declare updatedAt: string
     declare getLocation: BelongsToGetAssociationMixin<Location>
 }
 
@@ -25,12 +27,13 @@ Order.init({
     createdAt: {
         type: DataTypes.DATE,
         get() {
-            const dateTime = new Date(`${this.dataValues.createdAt}`)
-            // todo: check if handles dst correctly
-            // also move this to utils
-            const date = dateTime.toLocaleDateString('fi-FI', {timeZone: 'Europe/Helsinki'}) // dd.mm.yyyy
-            const time = dateTime.toLocaleTimeString('en-GB', {timeZone: 'Europe/Helsinki'}) // hh:mm:ss
-            return `${date} ${time}`
+            return formatDateTime(this.dataValues.createdAt)
+        }
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        get() {
+            return formatDateTime(this.dataValues.updatedAt)
         }
     }
 }, {
