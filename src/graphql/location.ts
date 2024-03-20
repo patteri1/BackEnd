@@ -7,9 +7,10 @@ export const typeDef = `
     } 
 
     extend type Mutation {
+        deleteLocation(id: Int!): Location
+        addLocation(location: LocationInput!): Location
         updateLocation(locationId: Int!, input: LocationInput!): Location
         addStorageToLocation(locationId: Int!, productId: Int!, palletAmount: Int!): Location
-        
     }
  
     type Location {
@@ -97,6 +98,31 @@ export const resolvers = {
 
     },
     Mutation: {
+        addLocation: async (_: unknown, location: LocationInput) => {
+            try {
+                const newLocation = await Location.create(location as Partial<Location>)
+                return newLocation
+            } catch (error) {
+                throw new Error(`Unable to add location: ${error}`)
+            }
+        },
+        deleteLocation: async (_: unknown, { id }: { id: number }) => {
+            console.log(id)
+            try {
+                const locationToDelete = await Location.findByPk(id)
+
+                if (!locationToDelete) {
+                    throw new Error(`Location with id: ${id} not found`)
+                }
+
+                await locationToDelete.destroy()
+                return locationToDelete
+
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Unable to delete location by id: ${id}`)
+            }
+        },
         updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
             try {
                 console.log(locationId)
