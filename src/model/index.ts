@@ -1,28 +1,32 @@
 import { Location } from './Location'
 import { Order } from './Order'
 import { OrderRow } from './OrderRow'
-import { PalletType } from './PalletType'
+import { Product } from './Product'
 import { Storage } from './Storage'
 import { UserRole } from "./UserRole"
 import { User } from "./User"
+import { LocationPrice } from './LocationPrice'
 
 // define associations
 Location.hasMany(Storage, { foreignKey: 'locationId' })
 Storage.belongsTo(Location, { foreignKey: 'locationId' })
 
-User.belongsTo(UserRole)
-UserRole.hasMany(User)
+Location.hasMany(LocationPrice, { foreignKey: 'locationId' })
+LocationPrice.belongsTo(Location, { foreignKey: 'locationId' })
 
 Location.hasMany(Order, { foreignKey: 'locationId' })
 Order.belongsTo(Location, { foreignKey: 'locationId' })
 
+User.belongsTo(UserRole, { foreignKey: 'userRoleId' })
+UserRole.hasMany(User, { foreignKey: 'userRoleId' })
+
 Order.hasMany(OrderRow, { foreignKey: 'orderId' })
 OrderRow.belongsTo(Order, { foreignKey: 'orderId' })
 
-PalletType.hasMany(Storage, { foreignKey: 'palletTypeId' })
-Storage.belongsTo(PalletType, { foreignKey: 'palletTypeId' })
+Product.hasMany(Storage, { foreignKey: 'productId' })
+Storage.belongsTo(Product, { foreignKey: 'productId' })
 
-PalletType.hasMany(OrderRow, { foreignKey: 'palletTypeId' })
-OrderRow.belongsTo(PalletType, { foreignKey: 'palletTypeId' })
+Product.hasMany(OrderRow, { foreignKey: 'productId' })
+OrderRow.belongsTo(Product, { foreignKey: 'productId' })
 
-export { Location, Order, OrderRow, PalletType, Storage, User, UserRole }
+export { Location, LocationPrice, Order, OrderRow, Product, Storage, User, UserRole }

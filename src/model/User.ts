@@ -3,7 +3,7 @@ import { sequelize } from '../util/db'
 import { UserRole } from './UserRole'
 
 export class User extends Model {
-    declare id: number
+    declare userId: number
     declare username: string
     declare passwordHash: string
     declare userRoleId: number
@@ -11,7 +11,7 @@ export class User extends Model {
 }
 
 User.init({
-    id: {
+    userId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
@@ -24,7 +24,11 @@ User.init({
     passwordHash: {
         type: DataTypes.STRING(60),
         allowNull: false,
-    }
+    },
+    userRoleId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
 }, {
     sequelize,
     modelName: 'user',

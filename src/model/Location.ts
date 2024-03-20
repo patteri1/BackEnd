@@ -1,25 +1,28 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
+import { LocationPrice } from './LocationPrice'
+import { Storage } from './Storage'
 
 export class Location extends Model {
     // type definitions
-    declare id: number
-    declare name: string
+    declare locationId: number
+    declare locationName: string
     declare address: string
     declare postCode: string
     declare city: string
-    declare price: number
     declare locationType: string
+    declare locationPrices: LocationPrice[]
+    declare storages: Storage[]
 }
 
 // map Location class to a table in the database
 Location.init({
-    id: {
+    locationId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
     },
-    name: {
+    locationName: {
         type: DataTypes.STRING(128),
         allowNull: false,
     },
@@ -31,10 +34,6 @@ Location.init({
     },
     city: {
         type: DataTypes.STRING(128),
-    },
-    price: {
-        type: DataTypes.FLOAT,
-        allowNull: false
     },
     locationType: {
         type: DataTypes.STRING(128),

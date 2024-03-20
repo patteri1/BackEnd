@@ -1,37 +1,41 @@
-import { Location } from "../model";
-import { Storage } from '../model'
-import { PalletType } from '../model';
+import { Location, Storage, Product } from "../model"
 
 export const typeDef = `
     extend type Query {
-        location(id: Int!): Location
+        location(locationId: Int!): Location
         allLocations: [Location]
     } 
 
-    input LocationInput {
-        name: String
-        address: String
-        city: String
-        postCode: String
-        price: Float
-        locationType: String
-    }
-
     extend type Mutation {
         updateLocation(locationId: Int!, input: LocationInput!): Location
-        addStorageToLocation(locationId: Int!, palletTypeId: Int!, amount: Int!): Location
+        addStorageToLocation(locationId: Int!, productId: Int!, palletAmount: Int!): Location
         
     }
  
     type Location {
-        id: Int!
-        name: String!
+        locationId: Int!
+        locationName: String!
         address: String!
-        city: String!
         postCode: String!
-        price: Float!
+        city: String!
         locationType: String!
+        locationPrices: [LocationPrice]!
         storages: [Storage]!
+    }
+
+    input LocationInput {
+        locationName: String
+        address: String
+        postCode: String
+        city: String
+        locationType: String
+    }
+
+    type LocationPrice {
+        locationPriceId: Int!
+        locationId: Int!
+        price: Float!
+        validFrom: String!
     }
 `
 
@@ -41,35 +45,34 @@ interface UpdateLocationArgs {
 }
 
 interface LocationInput {
-    name?: string
+    locationName?: string
     address?: string
-    city?: string
     postCode?: string
-    price?: number
+    city?: string
     locationType?: string
 }
 
 export const resolvers = {
     Query: {
-        location: async (_: unknown, args: { id: number }) => {
-            const { id } = args
+        location: async (_: unknown, args: { locationId: number }) => {
+            const { locationId } = args
 
             try {
-                const location = await Location.findByPk(id, {
+                const location = await Location.findByPk(locationId, {
                     include: [{
                         model: Storage,
-                        include: [PalletType]
+                        include: [Product]
                     }]
                 })
                 if (!location) {
-                    throw new Error(`Location with ID ${id} not found`)
+                    throw new Error(`Location with ID ${locationId} not found`)
                 }
 
-                return location;
+                return location
 
             } catch (error) {
                 console.log(error)
-                throw new Error(`Error retrieving location with ID ${id}`)
+                throw new Error(`Error retrieving location with ID ${locationId}`)
             }
         },
 
@@ -79,7 +82,7 @@ export const resolvers = {
                 const allLocations = await Location.findAll({
                     include: [{
                         model: Storage,
-                        include: [PalletType],
+                        include: [Product],
                     }]
                 })
 
@@ -94,7 +97,6 @@ export const resolvers = {
 
     },
     Mutation: {
-
         updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
             try {
                 console.log(locationId)
@@ -113,31 +115,30 @@ export const resolvers = {
                 }
             }
         },
-
-        addStorageToLocation: async (_: unknown, args: { locationId: number, palletTypeId: number, amount: number }) => {
+        addStorageToLocation: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number }) => {
             try {
                 const location = await Location.findByPk(args.locationId);
-                const palletType = await PalletType.findByPk(args.palletTypeId);
+                const product = await Product.findByPk(args.productId);
 
-                if (!location || !palletType) {
-                    throw new Error(`Location or PalletType not found`);
+                if (!location || !product) {
+                    throw new Error(`Location or Product not found`);
                 }
 
                 const existingStorage = await Storage.findOne({
                     where: {
                         locationId: args.locationId,
-                        palletTypeId: args.palletTypeId,
+                        productId: args.productId,
                     },
                 });
 
                 if (existingStorage) {
-                    throw new Error(`PalletType already exists for this Location`);
+                    throw new Error(`Product already exists for this Location`);
                 }
 
                 const newStorage = await Storage.create({
                     locationId: args.locationId,
-                    palletTypeId: args.palletTypeId,
-                    amount: args.amount,
+                    productId: args.productId,
+                    palletAmount: args.palletAmount,
                 });
 
                 return newStorage;
