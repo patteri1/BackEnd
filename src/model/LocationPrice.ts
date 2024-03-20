@@ -5,7 +5,7 @@ export class LocationPrice extends Model {
     declare locationPriceId: number
     declare locationId: number
     declare price: number
-    declare transactionTime: string
+    declare validFrom: Date
 }
 
 LocationPrice.init({
@@ -19,8 +19,8 @@ LocationPrice.init({
         allowNull: false
     },
     validFrom: {
-        type: DataTypes.DATEONLY,
-        allowNull: false
+        type: DataTypes.DATE,
+        allowNull: false,
     },
 }, {
     sequelize,

@@ -5,7 +5,7 @@ export class Storage extends Model {
     declare locationId: number
     declare palletTypeId: number
     declare amount: number
-    declare transactionTime: string
+    declare createdAt: Date
 }
 
 Storage.init({
@@ -22,6 +22,4 @@ Storage.init({
     sequelize,
     modelName: 'storage',
     timestamps: true,
-    updatedAt: false,
-    createdAt: 'transactionTime'
 })

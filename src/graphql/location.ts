@@ -33,7 +33,7 @@ export const typeDef = `
         palletTypeId: Int!
         amount: Int!
         palletType: PalletType!
-        transactionTime: String!
+        createdAt: String!
     }
 
     type PalletType {

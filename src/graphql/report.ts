@@ -21,20 +21,20 @@ export const typeDef: string = `
     type LocationReport {
         location: Location!
         dailyReports: [DailyReport]!
-        totalCost: Int!
+        totalCost: Float!
     }
 
     type DailyReport {
         date: String!
         productReports: [ProductReport]
         totalDailyPallets: Int!
-        totalDailyCost: Int!
+        totalDailyCost: Float!
     }
 
     type ProductReport {
         palletType: PalletType!
         palletAmount: Int!
-        cost: Int!
+        cost: Float!
     }
 `
 
@@ -104,7 +104,9 @@ export const resolvers = {
             FROM "locationPrice" "lp"
             WHERE "lp"."validFrom" >= :startDate
             AND "lp"."validFrom" <= :endDate --Price can change only at start of day time 00:00:00
-            AND "lp"."locationId" IN (:locationIds);
+            AND "lp"."locationId" IN (:locationIds)
+
+            ORDER BY "validFrom" ASC;
             `
 
             const locationPrices: LocationPrice[] = await sequelize.query(priceQuery, {
@@ -123,15 +125,15 @@ export const resolvers = {
                 }
             })
            
-            // get valid storages for date range
+            // get valid storages for date range, createdAt acts as valid from
             const storageQuery: string = `
           	    -- Storages that are valid on start date
-		        SELECT "s"."storageId", "s"."amount", "s"."transactionTime", "s"."locationId", "s"."palletTypeId"
+		        SELECT "s"."storageId", "s"."amount", "s"."createdAt", "s"."locationId", "s"."palletTypeId"
 		        FROM "storage" "s"
-		        WHERE ("s"."locationId", "s"."palletTypeId", "s"."transactionTime") IN (
-    		        SELECT "s2"."locationId", "s2"."palletTypeId", MAX("s2"."transactionTime")
+		        WHERE ("s"."locationId", "s"."palletTypeId", "s"."createdAt") IN (
+    		        SELECT "s2"."locationId", "s2"."palletTypeId", MAX("s2"."createdAt")
     		        FROM "storage" "s2"
-    		        WHERE "s2"."transactionTime" <= :startDate
+    		        WHERE "s2"."createdAt" <= :startDate
     		        AND "s2"."locationId" IN (:locationIds)
     		        GROUP BY "s2"."locationId", "s2"."palletTypeId"
 		        )
@@ -139,14 +141,16 @@ export const resolvers = {
 		        UNION
 
 		        -- Storage changes within the date range
-		        SELECT "s"."storageId", "s"."amount", "s"."transactionTime", "s"."locationId", "s"."palletTypeId"
+		        SELECT "s"."storageId", "s"."amount", "s"."createdAt", "s"."locationId", "s"."palletTypeId"
 		        FROM "storage" "s"
-		        WHERE "s"."transactionTime" >= :startDate
-		        AND "s"."transactionTime" < :endDate
-		        AND "s"."locationId" IN (:locationIds);
+		        WHERE "s"."createdAt" >= :startDate
+		        AND "s"."createdAt" < :endDate
+		        AND "s"."locationId" IN (:locationIds)
+
+                ORDER BY "createdAt" ASC;
 	        `
 
-            // use date after end date to get storages where transaction time is before midnight on end date
+            // use date after end date to get storages where createdAt is before midnight on end date
             let d: Date = new Date(endDate)
             d.setDate(d.getDate() + 1)
 
@@ -173,7 +177,7 @@ export const resolvers = {
                 let dailyReports: DailyReport[] = await createDailyReports(startDate, endDate, location)
 
                 // calculate total cost for the location
-                const totalCost = dailyReports.reduce((total, report) => total + report.totalDailyCost, 0);
+                const totalCost = parseFloat(dailyReports.reduce((total, report) => total + report.totalDailyCost, 0).toFixed(2))
 
                 // create location report
                 const locationReport: LocationReport = {
