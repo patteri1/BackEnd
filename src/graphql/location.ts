@@ -81,21 +81,11 @@ export const resolvers = {
 
         // get all locations
         allLocations: async () => {
-            const currentDate = new Date()
             try {
                 const allLocations = await Location.findAll({
                     include: [{
                         model: Storage,
                         include: [Product],
-                    },
-                    {
-                        model: LocationPrice,
-                        attributes: ['price', 'validFrom'],
-                        where: {
-                            validFrom: {
-                                [Op.lte]: currentDate
-                            }
-                        }
                     }]
                 })
 
