@@ -107,7 +107,6 @@ export const resolvers = {
             }
         },
         deleteLocation: async (_: unknown, { id }: { id: number }) => {
-            console.log(id)
             try {
                 const locationToDelete = await Location.findByPk(id)
 
@@ -119,13 +118,11 @@ export const resolvers = {
                 return locationToDelete
 
             } catch (error) {
-                console.log(error)
                 throw new Error(`Unable to delete location by id: ${id}`)
             }
         },
         updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
             try {
-                console.log(locationId)
                 const locationToUpdate = await Location.findByPk(locationId)
                 if (!locationToUpdate) {
                     throw new Error('Location not found')
