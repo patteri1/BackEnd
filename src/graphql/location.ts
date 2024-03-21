@@ -1,9 +1,11 @@
-import { Location, Storage, Product } from "../model"
+import { Location, Storage, Product, LocationPrice } from "../model"
+import { Op } from "sequelize"
 
 export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
         allLocations: [Location]
+        allLocationsWithPrice: [Location]
     } 
 
     extend type Mutation {
@@ -79,11 +81,21 @@ export const resolvers = {
 
         // get all locations
         allLocations: async () => {
+            const currentDate = new Date()
             try {
                 const allLocations = await Location.findAll({
                     include: [{
                         model: Storage,
                         include: [Product],
+                    },
+                    {
+                        model: LocationPrice,
+                        attributes: ['price', 'validFrom'],
+                        where: {
+                            validFrom: {
+                                [Op.lte]: currentDate
+                            }
+                        }
                     }]
                 })
 
@@ -94,8 +106,29 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
+        // Get all locations with the most recent price, future dates are filtered out
+        allLocationsWithPrice: async () => {
+            const currentDate = new Date()
+            try {
+                const locations = await Location.findAll({
+                    include: [{
+                        model: LocationPrice,
+                        attributes: ['price', 'validFrom'],
+                        where: {
+                            validFrom: {
+                                [Op.lte]: currentDate
+                            }
+                        },
+                        order: [['validFrom', 'DESC']],
+                        limit: 1
+                    }]
+                })
+                return locations
 
-
+            } catch (error) {
+                throw new Error('Error retrieving all locations ')
+            }
+        },
     },
     Mutation: {
         addLocation: async (_: unknown, location: LocationInput) => {
