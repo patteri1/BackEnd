@@ -7,7 +7,7 @@ import { LocationPrice } from '../model'
 
 export const insertTestData = async () => {
     try {
-        
+
         const [location1, location2, location3] = await Promise.all([
             Location.create({
                 locationName: 'Kuljetus Korhonen',
@@ -67,6 +67,11 @@ export const insertTestData = async () => {
                 locationId: location3.locationId,
                 price: 120.20,
                 validFrom: '2024-01-01',
+            }),
+            LocationPrice.create({
+                locationId: location3.locationId,
+                price: 120.20,
+                validFrom: '2024-01-21',
             }),
         ])
 

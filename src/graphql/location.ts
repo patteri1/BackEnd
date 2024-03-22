@@ -1,5 +1,7 @@
+import { group } from "console"
 import { Location, Storage, Product, LocationPrice } from "../model"
 import { Op } from "sequelize"
+import { sequelize } from "../util/db"
 
 export const typeDef = `
     extend type Query {
@@ -110,12 +112,32 @@ export const resolvers = {
                             }
                         },
                         order: [['validFrom', 'DESC']],
-                        limit: 1
+                        limit: 1,
+                    }, {
+                        model: Storage,
+                        include: [{
+                            model: Product,
+                            where: {
+                                createdAt: {
+                                    [Op.in]: sequelize.literal(`(
+                                        SELECT MAX(s2."createdAt") 
+                                        FROM "storage" "s2"
+                                        JOIN "storage" "s1"
+                                        ON "s2"."locationId" = "s1"."locationId"
+                                        GROUP BY "s2"."productId"
+                                     )`)
+                                }
+                            },
+                            required: false
+                        }],
+                        required: false
                     }]
+
                 })
                 return locations
 
             } catch (error) {
+                console.log(error)
                 throw new Error('Error retrieving all locations ')
             }
         },
