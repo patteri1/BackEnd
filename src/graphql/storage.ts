@@ -1,9 +1,10 @@
-import { Storage } from '../model/Storage'
-import { Product } from '../model/Product';
+import { Storage, Product, Location } from '../model'
+
 
 export const typeDef = `
     extend type Query {
         allStorages: [Storage]
+        availableStorages: [Storage]
     } 
 
     type Storage {
@@ -31,6 +32,24 @@ export const resolvers = {
                 throw new Error('Error retrieving all storages')
             }
         },
+        // storages available for ordering
+        availableStorages: async () => {
+            try {
+                const availableStorages = await Storage.findAll({
+                    include: [
+                        Product, 
+                        {
+                            model: Location, 
+                            where: { locationType: 'Käsittelylaitos' }
+                        }
+                    ]
+                })
+                return availableStorages
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error retrieving available pallets: ${error}`)
+            }
+        }
     },
     Mutation: {
         setAmountToStorage: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number }) => {
@@ -39,9 +58,7 @@ export const resolvers = {
 
                 // todo fix: this is probably very broken due to db changes.
 
-                // add a condition? 
-                // if a storage row for the wanted product and current date (createdAt)
-                // already exists, use storage.save(), if not, use storage.create()
+                // redo or make a new one
 
                 const storage = await Storage.findOne({
                     where: {

@@ -4,6 +4,7 @@ export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
         allLocations: [Location]
+        carrierLocations: [Location]
     } 
 
     extend type Mutation {
@@ -93,7 +94,20 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
+        // get all carriers
+        carrierLocations: async () => {
+            try {
+                const carriers = await Location.findAll({
+                    where: {locationType: 'Kuljetusliike'}
+                })
 
+                return carriers
+
+            } catch (error) {
+                console.log(error)
+                throw new Error('Error retrieving all locations ')
+            }
+        },
 
     },
     Mutation: {
