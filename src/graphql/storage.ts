@@ -1,11 +1,16 @@
-import { Storage, Product, Location } from '../model'
-
+import { Storage, Product, Location, Order, OrderRow } from '../model'
+import { Op } from "sequelize"
+import { sequelize } from "../util/db"
 
 export const typeDef = `
     extend type Query {
         allStorages: [Storage]
         availableStorages: [Storage]
     } 
+
+    extend type Mutation {
+        setAmountToStorage(locationId: Int!, productId: Int!, palletAmount: Int!): Storage
+    }
 
     type Storage {
         storageId: Int!
@@ -14,10 +19,6 @@ export const typeDef = `
         palletAmount: Int!
         product: Product!
         createdAt: String
-    }
-
-    extend type Mutation {
-        setAmountToStorage(locationId: Int!, productId: Int!, palletAmount: Int!): Storage
     }
 `
 
@@ -35,16 +36,55 @@ export const resolvers = {
         // storages available for ordering
         availableStorages: async () => {
             try {
-                const availableStorages = await Storage.findAll({
+                // get current storages in käsittelylaitos
+                const storages = await Storage.findAll({
                     include: [
-                        Product, 
                         {
                             model: Location, 
                             where: { locationType: 'Käsittelylaitos' }
-                        }
-                    ]
+                        },
+                        Product, 
+                    ],
+                    where: {
+                        createdAt: {
+                            [Op.in]: sequelize.literal(`(
+                                SELECT MAX("createdAt") 
+                                FROM "storage" s
+                                JOIN location l ON s."locationId" = l."locationId"
+                                WHERE l."locationType" = 'Käsittelylaitos'
+                                GROUP BY "productId"
+                             )`)
+                        },
+                    },
+                },
+                )
+
+                // get open order rows
+                const orderRows = await OrderRow.findAll({
+                    include: [
+                        {
+                            model: Order,
+                            attributes: ['status'],
+                            where: { 
+                                status: 'Avattu' 
+                            },
+                        },
+                        Product,
+                    ],
                 })
+
+                // storages - orders = available pallets
+                const availableStorages = storages.map(storage => {
+                    const rows = orderRows.filter(row => row.productId === storage.productId)
+                    const amount = rows.reduce((total, row) => total + row.palletAmount, 0)
+                    return {
+                        ...storage,
+                        palletAmount: storage.palletAmount - amount
+                    }
+                })
+                
                 return availableStorages
+
             } catch (error) {
                 console.log(error)
                 throw new Error(`Error retrieving available pallets: ${error}`)

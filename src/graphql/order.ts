@@ -108,7 +108,8 @@ export const resolvers = {
                     include: 'location', 
                     where: { 
                         status: 'Avattu' 
-                    }
+                    },
+                    order: [['createdAt', 'DESC']]
                 })
 
                 return orders
@@ -127,7 +128,8 @@ export const resolvers = {
                         status: {
                             [Op.or]: ['Noudettu', 'Peruttu']
                         } 
-                    }
+                    },
+                    order: [['createdAt', 'DESC']]
                 })
 
                 return orders
@@ -155,8 +157,6 @@ export const resolvers = {
                 }))
                 await OrderRow.bulkCreate(rows)
 
-                // todo: reduce pallets from original location's storage
-
                 return {
                     orderId: order.orderId,
                     location: {
@@ -165,7 +165,7 @@ export const resolvers = {
                     },
                     createdAt: order.createdAt,
                     status: order.status,
-                    orderRows: rows // todo fix: returns orderRows as null in Apollo, even though they get successfully saved in the db
+                    orderRows: rows
                 }
 
             } catch (error) {
@@ -194,7 +194,8 @@ export const resolvers = {
                 order.status = 'Noudettu'
                 await order.save()
 
-                // todo: add ordered pallets to new location's storage
+                // todo: reduce pallets from käsittelylaitos
+                // and add pallets to kuljetusliike
                 
                 return order
 
@@ -223,8 +224,6 @@ export const resolvers = {
                 }
                 order.status = 'Peruttu'
                 await order.save()
-
-                // todo: return pallets to original location's storage
                 
                 return order
 

@@ -1,10 +1,13 @@
-import { Location, Storage, Product } from "../model"
+import { Location, LocationPrice, Storage, Product } from "../model"
+import { Op } from "sequelize"
+import { sequelize } from "../util/db"
 
 export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
         allLocations: [Location]
         carrierLocations: [Location]
+        locationWithStorages(locationId: Int!): Location
     } 
 
     extend type Mutation {
@@ -108,7 +111,49 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
+        locationWithStorages: async (_: unknown, args: { locationId: number }) => {
+            const { locationId } = args
+            const currentDate = new Date()
+            try {
+                const location = await Location.findByPk(locationId, {
+                    include: [{
+                        model: LocationPrice,
+                        attributes: ['price', 'validFrom'],
+                        where: {
+                            validFrom: {
+                                [Op.lte]: currentDate
+                            }
+                        },
+                        order: [['validFrom', 'DESC']],
+                        limit: 1,
+                    }, {
+                        model: Storage,
+                        where: {
+                            createdAt: {
+                                [Op.in]: sequelize.literal(`(
+                                    SELECT MAX("createdAt") 
+                                    FROM "storage"
+                                    WHERE "locationId" = :locationId
+                                    GROUP BY "productId"
+                                 )`)
+                            },
+                        },
+                        include: [{
+                            model: Product,
+                            required: false
+                        }],
+                        required: false
+                    }],
+                    replacements: { locationId: locationId },
+                })
 
+                return location
+
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error retrieving location with id ${locationId}`)
+            }
+        },
     },
     Mutation: {
         updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
