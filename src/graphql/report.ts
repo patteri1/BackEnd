@@ -1,4 +1,4 @@
-import { Location, LocationPrice, PalletType, Storage } from '../model';
+import { Location, LocationPrice, Product, Storage } from '../model';
 import { createDailyReports } from './util/reportUtils';
 import { sequelize } from '../util/db';
 import { Op, QueryTypes } from 'sequelize';
@@ -32,7 +32,7 @@ export const typeDef: string = `
     }
 
     type ProductReport {
-        palletType: PalletType!
+        product: Product!
         palletAmount: Int!
         cost: Float!
     }
@@ -62,7 +62,7 @@ export interface DailyReport {
 }
 
 export interface ProductReport {
-    palletType: PalletType
+    product: Product
     palletAmount: number
     cost: number
 }
@@ -128,26 +128,24 @@ export const resolvers = {
             // get valid storages for date range, createdAt acts as valid from
             const storageQuery: string = `
           	    -- Storages that are valid on start date
-		        SELECT "s"."storageId", "s"."amount", "s"."createdAt", "s"."locationId", "s"."palletTypeId"
+		        SELECT "s"."storageId", "s"."palletAmount", "s"."createdAt", "s"."locationId", "s"."productId"
 		        FROM "storage" "s"
-		        WHERE ("s"."locationId", "s"."palletTypeId", "s"."createdAt") IN (
-    		        SELECT "s2"."locationId", "s2"."palletTypeId", MAX("s2"."createdAt")
+		        WHERE ("s"."locationId", "s"."productId", "s"."createdAt") IN (
+    		        SELECT "s2"."locationId", "s2"."productId", MAX("s2"."createdAt")
     		        FROM "storage" "s2"
     		        WHERE "s2"."createdAt" <= :startDate
     		        AND "s2"."locationId" IN (:locationIds)
-    		        GROUP BY "s2"."locationId", "s2"."palletTypeId"
+    		        GROUP BY "s2"."locationId", "s2"."productId"
 		        )
 	
 		        UNION
 
 		        -- Storage changes within the date range
-		        SELECT "s"."storageId", "s"."amount", "s"."createdAt", "s"."locationId", "s"."palletTypeId"
+		        SELECT "s"."storageId", "s"."palletAmount", "s"."createdAt", "s"."locationId", "s"."productId"
 		        FROM "storage" "s"
 		        WHERE "s"."createdAt" >= :startDate
 		        AND "s"."createdAt" < :endDate
-		        AND "s"."locationId" IN (:locationIds)
-
-                ORDER BY "createdAt" ASC;
+		        AND "s"."locationId" IN (:locationIds);
 	        `
 
             // use date after end date to get storages where createdAt is before midnight on end date

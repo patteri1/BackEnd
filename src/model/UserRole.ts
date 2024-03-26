@@ -2,17 +2,17 @@ import { Model, DataTypes } from 'sequelize'
 import { sequelize} from '../util/db'
 
 export class UserRole extends Model {
-    declare id: number
-    declare name: string
+    declare userRoleId: number
+    declare roleName: string
 }
 
 UserRole.init({
-    id: {
+    userRoleId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
     },
-    name: {
+    roleName: {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false,
