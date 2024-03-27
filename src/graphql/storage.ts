@@ -10,6 +10,7 @@ export const typeDef = `
 
     extend type Mutation {
         setAmountToStorage(locationId: Int!, productId: Int!, palletAmount: Int!): Storage
+        addPallets(storageInput: StorageInput!): Storage
     }
 
     type Storage {
@@ -20,7 +21,27 @@ export const typeDef = `
         product: Product!
         createdAt: String
     }
+
+    input StorageInput {
+        locationId: Int!
+        storageRows: [StorageRowInput]!
+    }
+
+    input StorageRowInput {
+        productId: Int!
+        palletAmount: Int!
+    }
 `
+
+interface StorageInput {
+    locationId: number
+    storageRows: [StorageRowInput]
+}
+
+interface StorageRowInput {
+    productId: number
+    palletAmount: number
+}
 
 export const resolvers = {
     Query: {
@@ -122,6 +143,47 @@ export const resolvers = {
                 throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId} and Product ID ${args.productId}`);
             }
         },
+        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+            try {
+                // get current storages
+                const storages = await Storage.findAll({
+                    include: [
+                        Location,
+                        Product, 
+                    ],
+                    where: {
+                        createdAt: {
+                            [Op.in]: sequelize.literal(`(
+                                SELECT MAX("createdAt") 
+                                FROM "storage" s
+                                WHERE "locationId" = :locationId
+                                GROUP BY "productId"
+                            )`)
+                        },
+                    },
+                    replacements: { locationId: storageInput.locationId },
+                },
+                )
+
+                // add rows (palletAmounts: current + input)
+                const rows = storageInput.storageRows.map((row) => {
+                    const storage = storages.find(storage => storage.productId === row.productId)
+                    return {
+                        locationId: storageInput.locationId,
+                        productId: row.productId,
+                        palletAmount: storage?.palletAmount ? storage.palletAmount + row.palletAmount : row.palletAmount
+                    }
+                })
+                Storage.bulkCreate(rows)
+
+                return rows[0] // (todo fix: return all rows)
+
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error: addPallets`);
+            }
+        }
+
     }
 
 }
