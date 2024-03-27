@@ -23,22 +23,22 @@ export const typeDef = `
     }
 
     input StorageInput {
-        locationId: Int!
         storageRows: [StorageRowInput]!
     }
 
     input StorageRowInput {
+        locationId: Int!
         productId: Int!
         palletAmount: Int!
     }
 `
 
 interface StorageInput {
-    locationId: number
     storageRows: [StorageRowInput]
 }
 
 interface StorageRowInput {
+    locationId: number
     productId: number
     palletAmount: number
 }
@@ -161,7 +161,7 @@ export const resolvers = {
                             )`)
                         },
                     },
-                    replacements: { locationId: storageInput.locationId },
+                    replacements: { locationId: storageInput.storageRows[0].locationId },
                 },
                 )
 
@@ -169,7 +169,7 @@ export const resolvers = {
                 const rows = storageInput.storageRows.map((row) => {
                     const storage = storages.find(storage => storage.productId === row.productId)
                     return {
-                        locationId: storageInput.locationId,
+                        locationId: storageInput.storageRows[0].locationId,
                         productId: row.productId,
                         palletAmount: storage?.palletAmount ? storage.palletAmount + row.palletAmount : row.palletAmount
                     }
