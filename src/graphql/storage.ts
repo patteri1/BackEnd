@@ -66,17 +66,17 @@ export const resolvers = {
                         },
                         Product, 
                     ],
-                    where: {
-                        createdAt: {
-                            [Op.in]: sequelize.literal(`(
-                                SELECT MAX("createdAt") 
-                                FROM "storage" s
-                                JOIN location l ON s."locationId" = l."locationId"
-                                WHERE l."locationType" = 'Käsittelylaitos'
-                                GROUP BY "productId"
-                             )`)
-                        },
-                    },
+                    where: sequelize.literal(`(
+                        (storage."productId", storage."createdAt")
+                        IN (
+                            SELECT "productId", MAX("createdAt") 
+                            FROM storage s
+                            JOIN location l ON s."locationId" = l."locationId"
+                            WHERE "locationType" = 'Käsittelylaitos' 
+                            GROUP BY "productId"
+                        )
+                    )`),
+                    order: [['productId', 'ASC']]
                 },
                 )
 
@@ -151,16 +151,15 @@ export const resolvers = {
                         Location,
                         Product, 
                     ],
-                    where: {
-                        createdAt: {
-                            [Op.in]: sequelize.literal(`(
-                                SELECT MAX("createdAt") 
-                                FROM "storage" s
-                                WHERE "locationId" = :locationId
-                                GROUP BY "productId"
-                            )`)
-                        },
-                    },
+                    where: sequelize.literal(`(
+                        (storage."productId", storage."createdAt")
+                        IN (
+                            SELECT "productId", MAX("createdAt") 
+                            FROM storage
+                            WHERE "locationId" = :locationId 
+                            GROUP BY "productId"
+                        )
+                    )`),
                     replacements: { locationId: storageInput.locationId },
                 },
                 )
