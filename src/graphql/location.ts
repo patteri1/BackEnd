@@ -6,7 +6,7 @@ export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
         allLocations: [Location]
-        carrierLocations: [Location]
+        locationsByType(locationType: String!): [Location]
         locationWithStorages(locationId: Int!): Location
     } 
 
@@ -97,18 +97,17 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
-        // get all carriers
-        carrierLocations: async () => {
+        // get locations by type (Kuljetusliike / Käsittelylaitos)
+        locationsByType: async (_: unknown, args: { locationType: string }) => {
             try {
-                const carriers = await Location.findAll({
-                    where: {locationType: 'Kuljetusliike'}
+                const locations = await Location.findAll({
+                    where: {locationType: args.locationType}
                 })
 
-                return carriers
-
+                return locations
             } catch (error) {
                 console.log(error)
-                throw new Error('Error retrieving all locations ')
+                throw new Error('Error retrieving locations by type')
             }
         },
         locationWithStorages: async (_: unknown, args: { locationId: number }) => {
