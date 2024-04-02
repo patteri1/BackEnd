@@ -48,11 +48,11 @@ interface UpdateLocationArgs {
 }
 
 interface LocationInput {
-    locationName?: string
-    address?: string
-    postCode?: string
-    city?: string
-    locationType?: string
+    locationName: string
+    address: string
+    postCode: string
+    city: string
+    locationType: string
 }
 
 export const resolvers = {
@@ -121,12 +121,13 @@ export const resolvers = {
         },
     },
     Mutation: {
-        addLocation: async (_: unknown, location: LocationInput) => {
+        addLocation: async (_: unknown, { location }: { location: LocationInput }) => {
             try {
                 const newLocation = await Location.create(location as Partial<Location>)
                 return newLocation
             } catch (error) {
                 throw new Error(`Unable to add location: ${error}`)
+                
             }
         },
         deleteLocation: async (_: unknown, { id }: { id: number }) => {
