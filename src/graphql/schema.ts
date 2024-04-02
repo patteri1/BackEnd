@@ -7,6 +7,7 @@ import { typeDef as Order, resolvers as orderResolvers } from './order'
 import { typeDef as Report, resolvers as reportResolvers } from './report'
 import { typeDef as Storage, resolvers as storageResolvers } from './storage'
 import { typeDef as Product, resolvers as productResolvers } from './product'
+import { typeDef as LocationPrice, resolvers as LocationPriceResolvers } from './LocationPrice'
 
 // this is extended, fake empty field added as you cannot have an empty type
 const Query = `
@@ -29,6 +30,6 @@ const resolvers = {
 
 // put everything together and make the schema
 export const schema = makeExecutableSchema({
-    typeDefs: [Query, Mutation, Location, User, Order, Storage, Product, Report],
-    resolvers: merge(resolvers, locationResolvers, userResolvers, orderResolvers, storageResolvers, productResolvers, reportResolvers),
+    typeDefs: [Query, Mutation, Location, User, Order, Storage, Product, Report, LocationPrice],
+    resolvers: merge(resolvers, locationResolvers, userResolvers, orderResolvers, storageResolvers, productResolvers, reportResolvers, LocationPriceResolvers),
 })
