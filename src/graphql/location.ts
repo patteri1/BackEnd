@@ -117,64 +117,35 @@ export const resolvers = {
                             [Op.in]: locationIds
                         }
                     },
-                    include: [{
-                        model: LocationPrice,
-                        attributes: ['price', 'validFrom'],
-                        where: {
-                            validFrom: {
-                                [Op.lte]: currentDate
-                            }
+                    include: [
+                        {
+                            model: LocationPrice,
+                            attributes: ['price', 'validFrom'],
+                            where: {
+                                validFrom: {
+                                    [Op.lte]: currentDate
+                                }
+                            },
+                            order: [['validFrom', 'DESC']],
+                            limit: 1,
                         },
-                        order: [['validFrom', 'DESC']],
-                        limit: 1,
-                    }],
+                        {
+                            model: Storage,
+                            include: [Product],
+                            where: sequelize.literal(`(
+                                ("productId", "createdAt")
+                                IN (
+                                    SELECT "productId", MAX("createdAt") 
+                                    FROM storage s
+                                    JOIN location l ON s."locationId" = l."locationId"
+                                    GROUP BY "productId"
+                                )
+                            )`),
+                        }
+                    ],
                 });
 
-                const storageQuery = `WITH ranked_storages AS (
-                    SELECT "s"."storageId", "s"."palletAmount", "s"."createdAt", "s"."locationId", "s"."productId",
-                           ROW_NUMBER() OVER(PARTITION BY "s"."locationId", "s"."productId" ORDER BY "s"."createdAt" DESC) as rn
-                    FROM "storage" "s"
-                    WHERE ("s"."locationId", "s"."productId", "s"."createdAt") IN (
-                        SELECT "s2"."locationId", "s2"."productId", MAX("s2"."createdAt")
-                        FROM "storage" "s2"
-                        WHERE "s2"."createdAt" <= :startDate 
-                        AND "s2"."locationId" IN (:locationIds) 
-                        GROUP BY "s2"."locationId", "s2"."productId"
-                    )
-                )
-                SELECT "storageId", "palletAmount", "createdAt", "locationId", "r"."productId", "productName"
-                FROM ranked_storages "r"
-                JOIN product "p" ON "r". "productId" = "p"."productId"
-                WHERE rn = 1;`;
 
-
-                const storages: Storage[] = await sequelize.query(storageQuery, {
-                    replacements: { locationIds: locationIds, startDate: currentDate },
-                    type: QueryTypes.SELECT,
-                })
-                const productIds = storages.map(storage => storage.productId)
-                // Retrieve products corresponding to the productIds
-                const products: Product[] = await Product.findAll({
-                    where: {
-                        productId: {
-                            [Op.in]: productIds
-                        }
-                    }
-                });
-
-                storages.forEach(storage => {
-                    const location = locations.find(location => location.locationId === storage.locationId);
-                    if (location) {
-                        if (!location.storages) {
-                            location.storages = []
-                        }
-                        location.storages.push(storage)
-
-
-                    }
-                })
-
-                console.log(locations, storages, products)
 
                 return locations;
 
