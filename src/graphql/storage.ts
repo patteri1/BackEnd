@@ -33,25 +33,21 @@ export const resolvers = {
         },
     },
     Mutation: {
-        setAmountToStorage: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number }) => {
+        setAmountToStorage: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number, createdAt: string }) => {
             try {
                 console.log('Updating palletAmount in storage for Location ID:', args.locationId, 'and Product ID:', args.productId);
 
-                // todo fix: this is probably very broken due to db changes.
-
-                // add a condition? 
-                // if a storage row for the wanted product and current date (createdAt)
-                // already exists, use storage.save(), if not, use storage.create()
-
+                // Check if the storage row for the wanted product and createdAt already exists
                 const storage = await Storage.findOne({
                     where: {
                         locationId: args.locationId,
                         productId: args.productId,
+                        createdAt: args.createdAt // Add the condition for createdAt
                     },
                 });
 
                 if (!storage) {
-                    throw new Error(`Storage with Location ID ${args.locationId} and Product ID ${args.productId} not found`);
+                    throw new Error(`Storage with Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt} not found`);
                 }
 
                 storage.palletAmount = args.palletAmount;
@@ -62,10 +58,11 @@ export const resolvers = {
                 return storage;
             } catch (error) {
                 console.error(error);
-                throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId} and Product ID ${args.productId}`);
+                throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt}`);
             }
         },
     }
+
 
 }
 

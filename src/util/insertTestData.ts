@@ -30,6 +30,7 @@ export const insertTestData = async () => {
                 city: 'Nivala',
                 locationType: 'Käsittelylaitos'
             }),
+
         ])
 
         await Promise.all([
@@ -260,6 +261,7 @@ export const insertTestData = async () => {
                 createdAt: '2023-12-28 16:33:39.175+00'
 
             }),
+
         ])
 
         console.log('Test data inserted successfully!');
