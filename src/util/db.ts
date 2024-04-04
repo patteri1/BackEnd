@@ -55,11 +55,11 @@ const initializeAdminUser = async () => {
     try {
         await User.findOrCreate({
             where: { username: adminUsername },
-            defaults: { username: adminUsername, passwordHash: adminPasswordHash, userRoleId: 1 },
+            defaults: { username: adminUsername, passwordHash: adminPasswordHash, userRoleId: 1, locationId: 4 },
         })
         await User.findOrCreate({
             where: { username: userUsername },
-            defaults: { username: userUsername, passwordHash: userPasswordHash, userRoleId: 2 },
+            defaults: { username: userUsername, passwordHash: userPasswordHash, userRoleId: 2, locationId: 1 },
         })
 
     } catch (error) {
