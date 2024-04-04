@@ -133,19 +133,27 @@ export const resolvers = {
                             model: Storage,
                             include: [Product],
                             where: sequelize.literal(`(
-                                ("productId", "createdAt")
+                                ("productId", "location"."locationId", "createdAt")
                                 IN (
-                                    SELECT "productId", MAX("createdAt") 
-                                    FROM storage s
-                                    JOIN location l ON s."locationId" = l."locationId"
-                                    GROUP BY "productId"
+                                    SELECT subquery."productId", subquery."locationId", subquery."createdAt"
+                                    FROM (
+                                        SELECT 
+                                            s."productId",
+                                            l."locationId",
+                                            s."createdAt",
+                                            ROW_NUMBER() OVER(PARTITION BY s."productId", s."locationId" ORDER BY s."createdAt" DESC) AS rn
+                                        FROM 
+                                            storage s
+                                        JOIN 
+                                            location l ON s."locationId" = l."locationId"
+                                    ) AS subquery
+                                    WHERE rn = 1
                                 )
                             )`),
                         }
                     ],
+                    order: ['locationId']
                 });
-
-
 
                 return locations;
 
