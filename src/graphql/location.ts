@@ -104,15 +104,11 @@ export const resolvers = {
                     include: [{
                         model: LocationPrice,
                         attributes: ['price', 'validFrom'],
-                        where: {
-                            validFrom: {
-                                [Op.lte]: currentDate
-                            }
-                        },
                         order: [['validFrom', 'DESC']],
-                        limit: 1
+
                     }]
                 })
+
                 return locations
 
             } catch (error) {
@@ -127,7 +123,7 @@ export const resolvers = {
                 return newLocation
             } catch (error) {
                 throw new Error(`Unable to add location: ${error}`)
-                
+
             }
         },
         deleteLocation: async (_: unknown, { id }: { id: number }) => {
