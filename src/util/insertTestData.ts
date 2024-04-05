@@ -60,11 +60,11 @@ export const insertTestData = async () => {
             LocationPrice.create({
                 locationId: location1.locationId,
                 price: 30.40,
-                validFrom: '2024-01-25',
+                validFrom: '2024-04-15',
             }),
             LocationPrice.create({
                 locationId: location1.locationId,
-                price: 30.40,
+                price: 38.40,
                 validFrom: '2024-01-31',
             }),
             LocationPrice.create({

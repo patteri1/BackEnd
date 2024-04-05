@@ -1,15 +1,19 @@
 import { Location, Storage, Product, LocationPrice } from "../model"
+import { Op } from "sequelize"
+
 
 export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
         allLocations: [Location]
+        allLocationsWithPrice: [Location]
     } 
 
     extend type Mutation {
+        deleteLocation(id: Int!): Location
+        addLocation(location: LocationInput!): Location
         updateLocation(locationId: Int!, input: LocationInput!): Location
         addStorageToLocation(locationId: Int!, productId: Int!, palletAmount: Int!): Location
-        
     }
  
     type Location {
@@ -45,11 +49,11 @@ interface UpdateLocationArgs {
 }
 
 interface LocationInput {
-    locationName?: string
-    address?: string
-    postCode?: string
-    city?: string
-    locationType?: string
+    locationName: string
+    address: string
+    postCode: string
+    city: string
+    locationType: string
 }
 
 export const resolvers = {
@@ -96,13 +100,53 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
+        // Get all locations with the most recent price, future dates are filtered out
+        allLocationsWithPrice: async () => {
+            const currentDate = new Date()
+            try {
+                const locations = await Location.findAll({
+                    include: [{
+                        model: LocationPrice,
+                        attributes: ['price', 'validFrom'],
+                        order: [['validFrom', 'DESC']],
 
+                    }]
+                })
 
+                return locations
+
+            } catch (error) {
+                throw new Error('Error retrieving all locations ')
+            }
+        },
     },
     Mutation: {
+        addLocation: async (_: unknown, { location }: { location: LocationInput }) => {
+            try {
+                const newLocation = await Location.create(location as Partial<Location>)
+                return newLocation
+            } catch (error) {
+                throw new Error(`Unable to add location: ${error}`)
+
+            }
+        },
+        deleteLocation: async (_: unknown, { id }: { id: number }) => {
+            try {
+                const locationToDelete = await Location.findByPk(id)
+
+                if (!locationToDelete) {
+                    throw new Error(`Location with id: ${id} not found`)
+                }
+
+                await locationToDelete.destroy()
+                return locationToDelete
+
+            } catch (error) {
+                throw new Error(`Unable to delete location by id: ${id}`)
+            }
+        },
         updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
             try {
-                console.log(locationId)
                 const locationToUpdate = await Location.findByPk(locationId)
                 if (!locationToUpdate) {
                     throw new Error('Location not found')
