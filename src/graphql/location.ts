@@ -1,13 +1,15 @@
+
 import { group } from "console"
 import { Location, Storage, Product, LocationPrice } from "../model"
 import { Op, QueryTypes, where } from "sequelize"
 import { sequelize } from "../util/db"
 
-
 export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
         allLocations: [Location]
+        locationsByType(locationType: String!): [Location]
+        locationWithStorages(locationId: Int!): Location
         locationsWithStorages(locationIds: [Int!]!): [Location]
         allLocationsWithPrice: [Location]
     } 
@@ -105,7 +107,61 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
+        // get locations by type (Kuljetusliike / Käsittelylaitos)
+        locationsByType: async (_: unknown, args: { locationType: string }) => {
+            try {
+                const locations = await Location.findAll({
+                    where: {locationType: args.locationType}
+                })
 
+                return locations
+            } catch (error) {
+                console.log(error)
+                throw new Error('Error retrieving locations by type')
+            }
+        },
+        locationWithStorages: async (_: unknown, args: { locationId: number }) => {
+            const { locationId } = args
+            const currentDate = new Date()
+            try {
+                const location = await Location.findByPk(locationId, {
+                    include: [{
+                        model: LocationPrice,
+                        attributes: ['price', 'validFrom'],
+                        where: {
+                            validFrom: {
+                                [Op.lte]: currentDate
+                            }
+                        },
+                        order: [['validFrom', 'DESC']],
+                        limit: 1,
+                    }, {
+                        model: Storage,
+                        where: {
+                            createdAt: {
+                                [Op.in]: sequelize.literal(`(
+                                    SELECT MAX("createdAt") 
+                                    FROM "storage"
+                                    WHERE "locationId" = :locationId
+                                    GROUP BY "productId"
+                                 )`)
+                            },
+                        },
+                        include: [{
+                            model: Product,
+                            required: false
+                        }],
+                        required: false
+                    }],
+                    replacements: { locationId: locationId },
+                })
+                
+                return location
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error retrieving location with id ${locationId}`)
+            }
+        },
         allLocationsWithPrice: async () => {
             const currentDate = new Date()
             try {
@@ -186,7 +242,6 @@ export const resolvers = {
                 throw new Error(`Error retrieving locations`)
             }
         }
-
     },
     Mutation: {
         addLocation: async (_: unknown, { location }: { location: LocationInput }) => {

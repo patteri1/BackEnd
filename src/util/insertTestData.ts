@@ -7,7 +7,6 @@ import { LocationPrice } from '../model'
 
 export const insertTestData = async () => {
     try {
-
         const [location1, location2, location3] = await Promise.all([
            
             Location.create({
@@ -271,7 +270,27 @@ export const insertTestData = async () => {
                 createdAt: '2023-12-28 16:33:39.175+00'
 
             }),
+            Storage.create({
+                locationId: location3.locationId,
+                productId: product2.productId,
+                palletAmount: 34,
+                createdAt: '2024-01-03 15:22:39.000+00'
 
+            }),
+            Storage.create({
+                locationId: location3.locationId,
+                productId: product1.productId,
+                palletAmount: 22,
+                createdAt: '2024-03-15 13:02:00.000+00'
+
+            }),
+            Storage.create({
+                locationId: location3.locationId,
+                productId: product3.productId,
+                palletAmount: 45,
+                createdAt: '2024-03-22 09:58:12.000+00'
+
+            }),
         ])
 
         console.log('Test data inserted successfully!');
