@@ -9,6 +9,7 @@ export const insertTestData = async () => {
     try {
 
         const [location1, location2, location3] = await Promise.all([
+           
             Location.create({
                 locationName: 'Kuljetus Korhonen',
                 address: 'Pihatie 7',
@@ -29,6 +30,15 @@ export const insertTestData = async () => {
                 postCode: '85500',
                 city: 'Nivala',
                 locationType: 'Käsittelylaitos'
+            }), 
+
+            //tämä luodaan vain adminkäyttäjää varten, koska locationId ei voi olla null
+            Location.create({
+                locationName: 'Admin',
+                address: 'Admintie',
+                postCode: '00900',
+                city: 'Helsinki',
+                locationType: 'Admin'
             }),
 
         ])
@@ -52,11 +62,11 @@ export const insertTestData = async () => {
             LocationPrice.create({
                 locationId: location1.locationId,
                 price: 30.40,
-                validFrom: '2024-01-25',
+                validFrom: '2024-04-15',
             }),
             LocationPrice.create({
                 locationId: location1.locationId,
-                price: 30.40,
+                price: 38.40,
                 validFrom: '2024-01-31',
             }),
             LocationPrice.create({

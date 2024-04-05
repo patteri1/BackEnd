@@ -3,6 +3,7 @@ import { Location, Storage, Product, LocationPrice } from "../model"
 import { Op, QueryTypes, where } from "sequelize"
 import { sequelize } from "../util/db"
 
+
 export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
@@ -57,7 +58,6 @@ interface LocationInput {
     postCode?: string
     city?: string
     locationType?: string
-
 }
 
 export const resolvers = {
@@ -70,14 +70,17 @@ export const resolvers = {
                     include: [{
                         model: Storage,
                         include: [Product]
-                    }]
+                    },
+                    {
+                        model: LocationPrice,
+                    }
+                ]
                 })
                 if (!location) {
                     throw new Error(`Location with ID ${locationId} not found`)
                 }
 
                 return location
-
             } catch (error) {
                 console.log(error)
                 throw new Error(`Error retrieving location with ID ${locationId}`)
@@ -111,6 +114,7 @@ export const resolvers = {
             }
 
             try {
+
                 const locations: Location[] = await Location.findAll({
                     where: {
                         locationId: {
@@ -165,12 +169,13 @@ export const resolvers = {
 
     },
     Mutation: {
-        addLocation: async (_: unknown, location: LocationInput) => {
+        addLocation: async (_: unknown, { location }: { location: LocationInput }) => {
             try {
                 const newLocation = await Location.create(location as Partial<Location>)
                 return newLocation
             } catch (error) {
                 throw new Error(`Unable to add location: ${error}`)
+
             }
         },
         deleteLocation: async (_: unknown, { id }: { id: number }) => {
