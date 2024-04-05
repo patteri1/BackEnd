@@ -1,6 +1,7 @@
 import { Model, DataTypes, BelongsToGetAssociationMixin } from 'sequelize'
 import { sequelize } from '../util/db'
 import { UserRole } from './UserRole'
+import { Location } from './Location'
 
 export class User extends Model {
     declare userId: number
@@ -8,6 +9,8 @@ export class User extends Model {
     declare passwordHash: string
     declare userRoleId: number
     declare getUserRole: BelongsToGetAssociationMixin<UserRole>
+    declare locationId: number
+    declare getLocation: BelongsToGetAssociationMixin<Location>
 }
 
 User.init({
@@ -20,6 +23,10 @@ User.init({
         type: DataTypes.STRING,
         unique: true,
         allowNull: false,
+    },
+    locationId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     passwordHash: {
         type: DataTypes.STRING(60),
