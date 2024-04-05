@@ -7,7 +7,7 @@ import { typeDef as Order, resolvers as orderResolvers } from './order'
 import { typeDef as Report, resolvers as reportResolvers } from './report'
 import { typeDef as Storage, resolvers as storageResolvers } from './storage'
 import { typeDef as Product, resolvers as productResolvers } from './product'
-import { typeDef as LocationPrice, resolvers as LocationPriceResolvers } from './LocationPrice'
+import { typeDef as LocationPrice, resolvers as LocationPriceResolvers } from './locationPrice'
 
 // this is extended, fake empty field added as you cannot have an empty type
 const Query = `
