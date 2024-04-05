@@ -1,12 +1,14 @@
+import { group } from "console"
 import { Location, Storage, Product, LocationPrice } from "../model"
-import { Op } from "sequelize"
+import { Op, QueryTypes, where } from "sequelize"
+import { sequelize } from "../util/db"
 
 
 export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
         allLocations: [Location]
-        allLocationsWithPrice: [Location]
+        locationsWithStorages(locationIds: [Int!]!): [Location]
     } 
 
     extend type Mutation {
@@ -35,12 +37,14 @@ export const typeDef = `
         locationType: String
     }
 
+
     type LocationPrice {
         locationPriceId: Int!
         locationId: Int!
         price: Float!
         validFrom: String!
     }
+
 `
 
 interface UpdateLocationArgs {
@@ -49,11 +53,11 @@ interface UpdateLocationArgs {
 }
 
 interface LocationInput {
-    locationName: string
-    address: string
-    postCode: string
-    city: string
-    locationType: string
+    locationName?: string
+    address?: string
+    postCode?: string
+    city?: string
+    locationType?: string
 }
 
 export const resolvers = {
@@ -100,25 +104,69 @@ export const resolvers = {
                 throw new Error('Error retrieving all locations ')
             }
         },
-        // Get all locations with the most recent price, future dates are filtered out
-        allLocationsWithPrice: async () => {
-            const currentDate = new Date()
+
+        locationsWithStorages: async (_: unknown, args: { locationIds: number[] }): Promise<Location[]> => {
+            const currentDate = new Date();
+            const { locationIds } = args
+            console.log(locationIds)
+            if (!Array.isArray(locationIds) || locationIds.length === 0) {
+                throw new Error('Invalid input: locationIds must be a non-empty array.');
+            }
+
             try {
-                const locations = await Location.findAll({
-                    include: [{
-                        model: LocationPrice,
-                        attributes: ['price', 'validFrom'],
-                        order: [['validFrom', 'DESC']],
 
-                    }]
-                })
+                const locations: Location[] = await Location.findAll({
+                    where: {
+                        locationId: {
+                            [Op.in]: locationIds
+                        }
+                    },
+                    include: [
+                        {
+                            model: LocationPrice,
+                            attributes: ['price', 'validFrom'],
+                            where: {
+                                validFrom: {
+                                    [Op.lte]: currentDate
+                                }
+                            },
+                            order: [['validFrom', 'DESC']],
+                            limit: 1,
+                        },
+                        {
+                            model: Storage,
+                            include: [Product],
+                            where: sequelize.literal(`(
+                                ("productId", "location"."locationId", "createdAt")
+                                IN (
+                                    SELECT subquery."productId", subquery."locationId", subquery."createdAt"
+                                    FROM (
+                                        SELECT 
+                                            s."productId",
+                                            l."locationId",
+                                            s."createdAt",
+                                            ROW_NUMBER() OVER(PARTITION BY s."productId", s."locationId" ORDER BY s."createdAt" DESC) AS rn
+                                        FROM 
+                                            storage s
+                                        JOIN 
+                                            location l ON s."locationId" = l."locationId"
+                                    ) AS subquery
+                                    WHERE rn = 1
+                                )
+                            )`),
+                        }
+                    ],
+                    order: ['locationId']
+                });
 
-                return locations
+                return locations;
 
             } catch (error) {
-                throw new Error('Error retrieving all locations ')
+                console.log(error);
+                throw new Error(`Error retrieving locations`)
             }
-        },
+        }
+
     },
     Mutation: {
         addLocation: async (_: unknown, { location }: { location: LocationInput }) => {
@@ -196,4 +244,5 @@ export const resolvers = {
         },
 
     }
+
 };

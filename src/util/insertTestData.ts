@@ -7,7 +7,7 @@ import { LocationPrice } from '../model'
 
 export const insertTestData = async () => {
     try {
-        
+
         const [location1, location2, location3] = await Promise.all([
            
             Location.create({
@@ -30,7 +30,8 @@ export const insertTestData = async () => {
                 postCode: '85500',
                 city: 'Nivala',
                 locationType: 'Käsittelylaitos'
-            }),
+            }), 
+
             //tämä luodaan vain adminkäyttäjää varten, koska locationId ei voi olla null
             Location.create({
                 locationName: 'Admin',
@@ -39,6 +40,7 @@ export const insertTestData = async () => {
                 city: 'Helsinki',
                 locationType: 'Admin'
             }),
+
         ])
 
         await Promise.all([
@@ -76,6 +78,11 @@ export const insertTestData = async () => {
                 locationId: location3.locationId,
                 price: 120.20,
                 validFrom: '2024-01-01',
+            }),
+            LocationPrice.create({
+                locationId: location3.locationId,
+                price: 120.20,
+                validFrom: '2024-01-21',
             }),
         ])
 
@@ -264,6 +271,7 @@ export const insertTestData = async () => {
                 createdAt: '2023-12-28 16:33:39.175+00'
 
             }),
+
         ])
 
         console.log('Test data inserted successfully!');
