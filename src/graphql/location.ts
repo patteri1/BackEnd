@@ -1,6 +1,7 @@
 import { Location, Storage, Product, LocationPrice } from "../model"
 import { Op } from "sequelize"
 
+
 export const typeDef = `
     extend type Query {
         location(locationId: Int!): Location
@@ -65,14 +66,17 @@ export const resolvers = {
                     include: [{
                         model: Storage,
                         include: [Product]
-                    }]
+                    },
+                    {
+                        model: LocationPrice,
+                    }
+                ]
                 })
                 if (!location) {
                     throw new Error(`Location with ID ${locationId} not found`)
                 }
 
                 return location
-
             } catch (error) {
                 console.log(error)
                 throw new Error(`Error retrieving location with ID ${locationId}`)

@@ -20,6 +20,9 @@ Order.belongsTo(Location, { foreignKey: 'locationId' })
 User.belongsTo(UserRole, { foreignKey: 'userRoleId' })
 UserRole.hasMany(User, { foreignKey: 'userRoleId' })
 
+User.belongsTo(Location, {foreignKey: 'locationId'})
+Location.hasMany(User, {foreignKey: 'locationId'})
+
 Order.hasMany(OrderRow, { foreignKey: 'orderId' })
 OrderRow.belongsTo(Order, { foreignKey: 'orderId' })
 

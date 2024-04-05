@@ -24,6 +24,7 @@ export const typeDef = `
     userId: Int!
     username: String!
     userRole: UserRole!
+	location: Location!
   }
 
   type UserRole {
@@ -94,13 +95,15 @@ export const resolvers = {
 				username: user.username,
 				userRoleId:  user.userRoleId
 			}, process.env.SECRET!, { expiresIn: 60*60 }) // one hour
-
+const location = await user.getLocation()
+console.log('MORORORORORO', location)
 			return {
 				token,
 				user: {
 					userId: user.userId,
 					username: user.username,
 					userRole: await user.getUserRole(),
+					location: await user.getLocation()
 				}
 			}
 		}

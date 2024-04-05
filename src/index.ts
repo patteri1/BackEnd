@@ -36,14 +36,16 @@ const start = async () => {
   app.use(express.json())
   app.use('/graphql', expressMiddleware(apollo, { context: createContext }))
 
+
+
   // set up database
   await connectToDatabase()
   await sequelize.sync({ force: true }) // create or update tables in the database to match model definitions
-  await initializeRoles()
-  await initializeAdminUser()
-  
-  // insert testdata
+  await initializeRoles()  
+  // insert testdata before creating users, bc users need location info
   await insertTestData()
+  await initializeAdminUser()
+
 
   // start express
   app.listen(port, () => {
