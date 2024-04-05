@@ -9,6 +9,7 @@ export const typeDef = `
         location(locationId: Int!): Location
         allLocations: [Location]
         locationsWithStorages(locationIds: [Int!]!): [Location]
+        allLocationsWithPrice: [Location]
     } 
 
     extend type Mutation {
@@ -101,6 +102,25 @@ export const resolvers = {
 
             } catch (error) {
                 console.log(error)
+                throw new Error('Error retrieving all locations ')
+            }
+        },
+
+        allLocationsWithPrice: async () => {
+            const currentDate = new Date()
+            try {
+                const locations = await Location.findAll({
+                    include: [{
+                        model: LocationPrice,
+                        attributes: ['price', 'validFrom'],
+                        order: [['validFrom', 'DESC']],
+
+                    }]
+                })
+
+                return locations
+
+            } catch (error) {
                 throw new Error('Error retrieving all locations ')
             }
         },
