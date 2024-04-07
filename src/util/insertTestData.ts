@@ -7,8 +7,8 @@ import { LocationPrice } from '../model'
 
 export const insertTestData = async () => {
     try {
-        
         const [location1, location2, location3] = await Promise.all([
+           
             Location.create({
                 locationName: 'Kuljetus Korhonen',
                 address: 'Pihatie 7',
@@ -29,7 +29,17 @@ export const insertTestData = async () => {
                 postCode: '85500',
                 city: 'Nivala',
                 locationType: 'Käsittelylaitos'
+            }), 
+
+            //tämä luodaan vain adminkäyttäjää varten, koska locationId ei voi olla null
+            Location.create({
+                locationName: 'Admin',
+                address: 'Admintie',
+                postCode: '00900',
+                city: 'Helsinki',
+                locationType: 'Admin'
             }),
+
         ])
 
         await Promise.all([
@@ -51,11 +61,11 @@ export const insertTestData = async () => {
             LocationPrice.create({
                 locationId: location1.locationId,
                 price: 30.40,
-                validFrom: '2024-01-25',
+                validFrom: '2024-04-15',
             }),
             LocationPrice.create({
                 locationId: location1.locationId,
-                price: 30.40,
+                price: 38.40,
                 validFrom: '2024-01-31',
             }),
             LocationPrice.create({
@@ -67,6 +77,11 @@ export const insertTestData = async () => {
                 locationId: location3.locationId,
                 price: 120.20,
                 validFrom: '2024-01-01',
+            }),
+            LocationPrice.create({
+                locationId: location3.locationId,
+                price: 120.20,
+                validFrom: '2024-01-21',
             }),
         ])
 
@@ -253,6 +268,30 @@ export const insertTestData = async () => {
                 palletAmount: 1,
                 createdAt: '2023-12-28 16:33:39.175+00'
             }),
+
+            Storage.create({
+                locationId: location3.locationId,
+                productId: product2.productId,
+                palletAmount: 34,
+                createdAt: '2024-01-03 15:22:39.000+00'
+
+            }),
+            Storage.create({
+                locationId: location3.locationId,
+                productId: product1.productId,
+                palletAmount: 22,
+                createdAt: '2024-03-15 13:02:00.000+00'
+
+            }),
+            Storage.create({
+                locationId: location3.locationId,
+                productId: product3.productId,
+                palletAmount: 45,
+                createdAt: '2024-03-22 09:58:12.000+00'
+
+            }),
+        ])
+
 
         Storage.create({
           locationId: location1.locationId,

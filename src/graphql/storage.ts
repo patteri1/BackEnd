@@ -1,10 +1,17 @@
-import { Storage } from '../model/Storage'
-import { Product } from '../model/Product';
+import { Storage, Product, Location, Order, OrderRow } from '../model'
+import { Op } from "sequelize"
+import { sequelize } from "../util/db"
 
 export const typeDef = `
     extend type Query {
         allStorages: [Storage]
+        availableStorages: [Storage]
     } 
+
+    extend type Mutation {
+        setAmountToStorage(locationId: Int!, productId: Int!, palletAmount: Int!): Storage
+        addPallets(storageInput: StorageInput!): Storage
+    }
 
     type Storage {
         storageId: Int!
@@ -15,10 +22,26 @@ export const typeDef = `
         createdAt: String
     }
 
-    extend type Mutation {
-        setAmountToStorage(locationId: Int!, productId: Int!, palletAmount: Int!): Storage
+    input StorageInput {
+        locationId: Int!
+        storageRows: [StorageRowInput]!
+    }
+
+    input StorageRowInput {
+        productId: Int!
+        palletAmount: Int!
     }
 `
+
+interface StorageInput {
+    locationId: number
+    storageRows: [StorageRowInput]
+}
+
+interface StorageRowInput {
+    productId: number
+    palletAmount: number
+}
 
 export const resolvers = {
     Query: {
@@ -31,27 +54,83 @@ export const resolvers = {
                 throw new Error('Error retrieving all storages')
             }
         },
+        // storages available for ordering
+        availableStorages: async () => {
+            try {
+                // get current storages in käsittelylaitos
+                const storages = await Storage.findAll({
+                    include: [
+                        {
+                            model: Location, 
+                            where: { locationType: 'Käsittelylaitos' }
+                        },
+                        Product, 
+                    ],
+                    where: sequelize.literal(`(
+                        (storage."productId", storage."createdAt")
+                        IN (
+                            SELECT "productId", MAX("createdAt") 
+                            FROM storage s
+                            JOIN location l ON s."locationId" = l."locationId"
+                            WHERE "locationType" = 'Käsittelylaitos' 
+                            GROUP BY "productId"
+                        )
+                    )`),
+                    order: [['productId', 'ASC']]
+                },
+                )
+
+                // get open order rows
+                const orderRows = await OrderRow.findAll({
+                    include: [
+                        {
+                            model: Order,
+                            attributes: ['status'],
+                            where: { 
+                                status: 'Avattu' 
+                            },
+                        },
+                        Product,
+                    ],
+                })
+
+                // storages - orders = available pallets
+                const availableStorages = storages.map(storage => {
+                    const rows = orderRows.filter(row => row.productId === storage.productId)
+                    const amount = rows.reduce((total, row) => total + row.palletAmount, 0)
+                    return {
+                        ...storage,
+                        palletAmount: storage.palletAmount - amount
+                    }
+                })
+                
+                return availableStorages
+
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error retrieving available pallets: ${error}`)
+            }
+        }
     },
     Mutation: {
-        setAmountToStorage: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number }) => {
+        setAmountToStorage: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number, createdAt: string }) => {
             try {
                 console.log('Updating palletAmount in storage for Location ID:', args.locationId, 'and Product ID:', args.productId);
 
                 // todo fix: this is probably very broken due to db changes.
 
-                // add a condition? 
-                // if a storage row for the wanted product and current date (createdAt)
-                // already exists, use storage.save(), if not, use storage.create()
+                // redo or make a new one
 
                 const storage = await Storage.findOne({
                     where: {
                         locationId: args.locationId,
                         productId: args.productId,
+                        createdAt: args.createdAt // Add the condition for createdAt
                     },
                 });
 
                 if (!storage) {
-                    throw new Error(`Storage with Location ID ${args.locationId} and Product ID ${args.productId} not found`);
+                    throw new Error(`Storage with Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt} not found`);
                 }
 
                 storage.palletAmount = args.palletAmount;
@@ -62,10 +141,51 @@ export const resolvers = {
                 return storage;
             } catch (error) {
                 console.error(error);
-                throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId} and Product ID ${args.productId}`);
+                throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt}`);
             }
         },
+        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+            try {
+                // get current storages
+                const storages = await Storage.findAll({
+                    include: [
+                        Location,
+                        Product, 
+                    ],
+                    where: sequelize.literal(`(
+                        (storage."productId", storage."createdAt")
+                        IN (
+                            SELECT "productId", MAX("createdAt") 
+                            FROM storage
+                            WHERE "locationId" = :locationId 
+                            GROUP BY "productId"
+                        )
+                    )`),
+                    replacements: { locationId: storageInput.locationId },
+                },
+                )
+
+                // add rows (palletAmount: current + input)
+                const rows = storageInput.storageRows.map((row) => {
+                    const storage = storages.find(storage => storage.productId === row.productId)
+                    return {
+                        locationId: storageInput.locationId,
+                        productId: row.productId,
+                        palletAmount: storage?.palletAmount ? storage.palletAmount + row.palletAmount : row.palletAmount
+                    }
+                })
+                Storage.bulkCreate(rows)
+
+                return rows[0] // (todo fix: return all rows)
+
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error: addPallets`);
+            }
+        }
+
     }
+
 
 }
 
