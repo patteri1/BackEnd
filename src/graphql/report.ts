@@ -2,6 +2,7 @@ import { Location, LocationPrice, Product, Storage } from '../model';
 import { createDailyReports } from './util/reportUtils';
 import { sequelize } from '../util/db';
 import { Op, QueryTypes } from 'sequelize';
+import { validLocationPricesForDateRange, validStoragesForDateRange } from './util/db_queries';
 
 export const typeDef: string = `
     extend type Query {
@@ -69,10 +70,24 @@ export interface ProductReport {
 
 export const resolvers = {
     Query: {
-        report: async (_: unknown, args: { input: ReportInput }): Promise<Report> => {
+        report: async (_: unknown, args: { input: ReportInput }, context: { user?: any }): Promise<Report> => {
+            // check that the user has the admin role
+			// TODO: This could be improved
+			if (!context.user || context.user.userRoleId !== 1) { 
+                throw new Error('Invalid token');
+            }
 
             const startDate: Date = new Date(args.input.startDate)
             const endDate: Date = new Date(args.input.endDate)
+
+            // Validate dates
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                throw new Error('Invalid date format');
+            }
+
+            if (startDate > endDate) {
+                throw new Error('Start date cannot be later than end date');
+            }
 
             // Fetch locations specified in the query by id
             const { locationIds } = args.input
@@ -83,33 +98,9 @@ export const resolvers = {
                     }
                 },
             });
-            
-            // get valid prices for the date range
-            const priceQuery: string = ` 
-            -- Prices that are valid on start date
-            SELECT "lp"."locationPriceId", "lp"."price", "lp"."validFrom", "lp"."locationId"
-            FROM "locationPrice" "lp"
-            WHERE "lp"."validFrom" = (
-                SELECT MAX("lp2"."validFrom")
-                FROM "locationPrice" "lp2"
-                WHERE "lp2"."validFrom" <= :startDate
-                AND "lp2"."locationId" = "lp"."locationId"
-            )
-            AND "lp"."locationId" IN (:locationIds)
-            
-            UNION
-            
-            -- Price changes within the date range
-            SELECT "lp"."locationPriceId", "lp"."price", "lp"."validFrom", "lp"."locationId"
-            FROM "locationPrice" "lp"
-            WHERE "lp"."validFrom" >= :startDate
-            AND "lp"."validFrom" <= :endDate --Price can change only at start of day time 00:00:00
-            AND "lp"."locationId" IN (:locationIds)
 
-            ORDER BY "validFrom" ASC;
-            `
-
-            const locationPrices: LocationPrice[] = await sequelize.query(priceQuery, {
+            // get valid prices
+            const locationPrices: LocationPrice[] = await sequelize.query(validLocationPricesForDateRange, {
                     replacements: { locationIds: locationIds, startDate: startDate, endDate: endDate },
                     type: QueryTypes.SELECT
             })
@@ -125,34 +116,12 @@ export const resolvers = {
                 }
             })
            
-            // get valid storages for date range, createdAt acts as valid from
-            const storageQuery: string = `
-          	    -- Storages that are valid on start date
-		        SELECT "s"."storageId", "s"."palletAmount", "s"."createdAt", "s"."locationId", "s"."productId"
-		        FROM "storage" "s"
-		        WHERE ("s"."locationId", "s"."productId", "s"."createdAt") IN (
-    		        SELECT "s2"."locationId", "s2"."productId", MAX("s2"."createdAt")
-    		        FROM "storage" "s2"
-    		        WHERE "s2"."createdAt" <= :startDate
-    		        AND "s2"."locationId" IN (:locationIds)
-    		        GROUP BY "s2"."locationId", "s2"."productId"
-		        )
-	
-		        UNION
-
-		        -- Storage changes within the date range
-		        SELECT "s"."storageId", "s"."palletAmount", "s"."createdAt", "s"."locationId", "s"."productId"
-		        FROM "storage" "s"
-		        WHERE "s"."createdAt" >= :startDate
-		        AND "s"."createdAt" < :endDate
-		        AND "s"."locationId" IN (:locationIds);
-	        `
-
             // use date after end date to get storages where createdAt is before midnight on end date
             let d: Date = new Date(endDate)
             d.setDate(d.getDate() + 1)
 
-            const storages: Storage[] = await sequelize.query(storageQuery, {
+            // get valid storages
+            const storages: Storage[] = await sequelize.query(validStoragesForDateRange, {
                 replacements: { locationIds: locationIds, startDate: startDate, endDate: d  },
                 type: QueryTypes.SELECT
             })
@@ -172,7 +141,7 @@ export const resolvers = {
             const locationReportPromises = locations.map(async (location) => {
 
                 // create a daily report for each date
-                let dailyReports: DailyReport[] = await createDailyReports(startDate, endDate, location)
+                let dailyReports: DailyReport[] = await createDailyReports(startDate, endDate, location)                
 
                 // calculate total cost for the location
                 const totalCost = parseFloat(dailyReports.reduce((total, report) => total + report.totalDailyCost, 0).toFixed(2))
