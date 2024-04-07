@@ -14,7 +14,7 @@ export async function createDailyReports(startDate: Date, endDate: Date, locatio
         let i: number = 1 // index for next price
 
         // change the currentValidPrice if there is a new valid price for this date d
-        if(i < location.locationPrices.length && d >= location.locationPrices[i].validFrom){
+        if(i < location.locationPrices.length && d >= new Date(location.locationPrices[i].validFrom)){
             currentValidLocationPrice = location.locationPrices[i]
         }
 
@@ -47,8 +47,8 @@ async function createProductReports(location: Location, date: Date, products: Pr
         const productStorageData: Storage[] = location.storages.filter((storage) => storage.productId === product.productId)
 
         // get the valid storage for this date, storages need to be in desc order so we get the latest valid one with .find()
-        const storagesDesc: Storage[] = productStorageData.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        const validStorage: Storage | undefined = storagesDesc.find((storage) => storage.createdAt < date)
+        const storagesDesc: Storage[] = productStorageData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        const validStorage: Storage | undefined = storagesDesc.find((storage) => new Date(storage.createdAt) < date)
         
         const amount: number = validStorage ? validStorage.palletAmount : 0
         const cost: number = amount * (price / 30)

@@ -7,8 +7,8 @@ export class Storage extends Model {
     declare locationId: number
     declare productId: number
     declare palletAmount: number
-    declare createdAt: Date
-    declare updatedAt: Date
+    declare createdAt: string
+    declare updatedAt: string
 }
 
 Storage.init({
