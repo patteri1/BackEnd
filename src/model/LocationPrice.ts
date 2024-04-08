@@ -23,8 +23,8 @@ LocationPrice.init({
         allowNull: false
     },
     validFrom: {
-        type: DataTypes.DATEONLY,
-        allowNull: false
+        type: DataTypes.DATE,
+        allowNull: false,
     },
 }, {
     sequelize,

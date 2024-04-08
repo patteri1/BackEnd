@@ -171,8 +171,7 @@ export const insertTestData = async () => {
             }),
         ])
 
-        await Promise.all([
-            Storage.create({
+        await Promise.all([Storage.create({
                 locationId: location1.locationId,
                 productId: product1.productId,
                 palletAmount: 20,
@@ -268,8 +267,8 @@ export const insertTestData = async () => {
                 productId: product3.productId,
                 palletAmount: 1,
                 createdAt: '2023-12-28 16:33:39.175+00'
-
             }),
+
             Storage.create({
                 locationId: location3.locationId,
                 productId: product2.productId,
@@ -293,7 +292,38 @@ export const insertTestData = async () => {
             }),
         ])
 
-        console.log('Test data inserted successfully!');
+
+        Storage.create({
+          locationId: location1.locationId,
+          productId: product3.productId,
+          palletAmount: 1,
+          createdAt: "2024-01-15 20:01:55.162+00",
+        }),
+
+        Storage.create({
+          locationId: location1.locationId,
+          productId: product3.productId,
+          palletAmount: 2,
+          updatedAt: new Date("2024-01-31 09:06:20.162+00"),
+          createdAt: "2024-01-31 09:06:20.162+00",
+        }),
+
+        Storage.create({
+          locationId: location2.locationId,
+          productId: product3.productId,
+          palletAmount: 3,
+          createdAt: "2023-12-28 16:33:39.175+00",
+        }),
+
+        Storage.create({
+          locationId: location3.locationId,
+          productId: product3.productId,
+          palletAmount: 1,
+          createdAt: "2023-12-28 16:33:39.175+00",
+        }),
+      ]);
+
+      console.log("Test data inserted successfully!");
     } catch (error) {
         console.error('Error inserting test data:', error);
     }
