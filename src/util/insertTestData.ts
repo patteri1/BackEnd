@@ -292,21 +292,6 @@ export const insertTestData = async () => {
             }),
 
             Storage.create({
-            locationId: location1.locationId,
-            productId: product3.productId,
-            palletAmount: 1,
-            createdAt: "2024-01-15 20:01:55.162+00",
-            }),
-
-            Storage.create({
-            locationId: location1.locationId,
-            productId: product3.productId,
-            palletAmount: 2,
-            updatedAt: new Date("2024-01-31 09:06:20.162+00"),
-            createdAt: "2024-01-31 09:06:20.162+00",
-            }),
-
-            Storage.create({
             locationId: location2.locationId,
             productId: product3.productId,
             palletAmount: 3,
