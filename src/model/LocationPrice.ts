@@ -26,9 +26,6 @@ LocationPrice.init({
     validFrom: {
         type: DataTypes.DATE,
         allowNull: false,
-        get() {
-            return formatDateTime(this.dataValues.validFrom)
-        }
     },
 }, {
     sequelize,
