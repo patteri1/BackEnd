@@ -4,12 +4,24 @@ import cors from 'cors'
 import { expressMiddleware } from '@apollo/server/express4'
 
 import { schema } from './graphql/schema'
-import { connectToDatabase, sequelize } from './util/db'
+import { connectToDatabase, initializeAdminUser, initializeRoles, sequelize } from './util/db'
+import { insertTestData } from './util/insertTestData'
+import { createContext } from './graphql/context'
 
 const app = express();
 const port = 3000;
 
 const start = async () => {
+  // check that .env is correctly setup
+  if (!process.env.SECRET) {
+    console.error('ERROR: SECRET is not set in dotenv.');
+    process.exit(1);
+  }
+
+  if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+    console.error('ERROR: ADMIN_USERNAME or ADMIN_PASSWORD is not set in dotenv.');
+    process.exit(1);
+  }
 
   // set up Apollo Server
   const apollo = new ApolloServer({
@@ -22,11 +34,18 @@ const start = async () => {
   // set up middleware
   app.use(cors());
   app.use(express.json())
-  app.use('/graphql', expressMiddleware(apollo))
+  app.use('/graphql', expressMiddleware(apollo, { context: createContext }))
 
-  // connect and synchronise database
+
+
+  // set up database
   await connectToDatabase()
-  sequelize.sync() // create or update tables in the database to match model definitions
+  await sequelize.sync({ force: true }) // create or update tables in the database to match model definitions
+  await initializeRoles()  
+  // insert testdata before creating users, bc users need location info
+  await insertTestData()
+  await initializeAdminUser()
+
 
   // start express
   app.listen(port, () => {
