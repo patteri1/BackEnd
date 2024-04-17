@@ -13,7 +13,7 @@ const connectToDatabase = async () => {
         await sequelize.authenticate()
         console.log("Database connection OK")
     } catch (error) {
-        console.log("Database connection failed")
+        console.log("Database connection failed", error)
         return process.exit(1)
     }
 
