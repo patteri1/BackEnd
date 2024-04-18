@@ -1,8 +1,16 @@
 import bcrypt from 'bcrypt'
 import { Sequelize } from "sequelize";
 import { User, UserRole } from "../model";
+import 'dotenv/config'
 
-const sequelize = new Sequelize("postgres://postgres@localhost:5432/postgres", {
+const database = process.env.DB_NAME!
+const username = process.env.DB_USERNAME!
+const password = process.env.DB_PASSWORD!
+const port = 5432
+const sequelize = new Sequelize(database, username, password, {
+    host: process.env.DB_HOST,
+    port: port,
+    dialect: 'postgres',
     define: {
         freezeTableName: true
     }
