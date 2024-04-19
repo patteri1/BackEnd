@@ -36,6 +36,7 @@ const initializeRoles = async () => {
     }
 }
 
+// todo: rename
 const initializeAdminUser = async () => {
     const adminUsername: string = process.env.ADMIN_USERNAME!
     const adminPassword: string = process.env.ADMIN_PASSWORD!
@@ -44,13 +45,23 @@ const initializeAdminUser = async () => {
 	const saltRounds: number = 10
 	const adminPasswordHash: string = await bcrypt.hash(adminPassword, saltRounds)
 
+    // other test users:
+
     const userUsername: string = process.env.USER_USERNAME!
     const userPassword: string = process.env.USER_PASSWORD!
+    const userPasswordHash: string = await bcrypt.hash(userPassword, saltRounds)
 
-    // Hash the password
+    const userTransport1: string = process.env.TRANSPORT1_USERNAME!
+    const pwTransport1: string = process.env.TRANSPORT1_PASSWORD!
+    const pwTransport1Hash: string = await bcrypt.hash(pwTransport1, saltRounds)
 
-	const userPasswordHash: string = await bcrypt.hash(userPassword, saltRounds)
+    const userTransport2: string = process.env.TRANSPORT2_USERNAME!
+    const pwTransport2: string = process.env.TRANSPORT2_PASSWORD!
+    const pwTransport2Hash: string = await bcrypt.hash(pwTransport2, saltRounds)
 
+    const userProcessing: string = process.env.PROCESSING_USERNAME!
+    const pwProcessing: string = process.env.PROCESSING_PASSWORD!
+    const pwProcessingHash: string = await bcrypt.hash(pwProcessing, saltRounds)
 
     try {
         await User.findOrCreate({
@@ -60,6 +71,18 @@ const initializeAdminUser = async () => {
         await User.findOrCreate({
             where: { username: userUsername },
             defaults: { username: userUsername, passwordHash: userPasswordHash, userRoleId: 2, locationId: 1 },
+        })
+        await User.findOrCreate({
+            where: { username: userTransport1 },
+            defaults: { username: userTransport1, passwordHash: pwTransport1Hash, userRoleId: 2, locationId: 1 },
+        })
+        await User.findOrCreate({
+            where: { username: userTransport2 },
+            defaults: { username: userTransport2, passwordHash: pwTransport2Hash, userRoleId: 2, locationId: 2 },
+        })
+        await User.findOrCreate({
+            where: { username: userProcessing },
+            defaults: { username: userProcessing, passwordHash: pwProcessingHash, userRoleId: 3, locationId: 3 },
         })
 
     } catch (error) {
