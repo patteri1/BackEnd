@@ -27,8 +27,9 @@ export async function createDailyReports(startDate: Date, endDate: Date, locatio
 
         const dailyReport: DailyReport = {
             date: d.toISOString(),
+            price: currentValidLocationPrice.price,
             productReports: productReports,
-            totalDailyPallets: totalDailyPallets,
+            totalDailyPallets: totalDailyPallets,   
             totalDailyCost: totalDailyCost,
         }
         dailyReports.push(dailyReport)

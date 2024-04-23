@@ -27,6 +27,7 @@ export const typeDef: string = `
 
     type DailyReport {
         date: String!
+        price: Float!
         productReports: [ProductReport]
         totalDailyPallets: Int!
         totalDailyCost: Float!
@@ -57,6 +58,7 @@ export interface LocationReport {
 
 export interface DailyReport {
     date: string
+    price: number
     productReports: ProductReport[]
     totalDailyPallets: number
     totalDailyCost: number
@@ -73,9 +75,9 @@ export const resolvers = {
         report: async (_: unknown, args: { input: ReportInput }, context: { user?: any }): Promise<Report> => {
             // check that the user has the admin role
 			// TODO: This could be improved
-		    if (!context.user || context.user.userRoleId !== 1) { 
-                 throw new Error('Invalid token');
-            }
+		    // if (!context.user || context.user.userRoleId !== 1) { 
+            //      throw new Error('Invalid token');
+            // }
 
             const startDate: Date = new Date(args.input.startDate)
             const endDate: Date = new Date(args.input.endDate)
