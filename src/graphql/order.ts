@@ -5,8 +5,8 @@ export const typeDef = `
     extend type Query {
         order(orderId: Int!): Order
         allOrders: [Order]
-        openOrders: [Order]
-        closedOrders: [Order]
+        openOrders(locationIds: [Int!]!): [Order]
+        closedOrders(locationIds: [Int!]!): [Order]
     }
 
     extend type Mutation {
@@ -102,12 +102,20 @@ export const resolvers = {
             }
         },
         // get all open orders (status Avattu)
-        openOrders: async () =>  { 
+        openOrders: async (_: unknown, args: { locationIds: number[] }): Promise<Order[]> =>  { 
+            const { locationIds } = args
+            if (!Array.isArray(locationIds) || locationIds.length === 0) {
+                throw new Error('Invalid input: locationIds must be a non-empty array.');
+            }
+            
             try {
                 const orders = await Order.findAll({
                     include: 'location', 
                     where: { 
-                        status: 'Avattu' 
+                        status: 'Avattu',
+                        locationId: {
+                            [Op.in]: locationIds
+                        }
                     },
                     order: [['createdAt', 'DESC']]
                 })
@@ -120,14 +128,21 @@ export const resolvers = {
             }
         },
         // get all closed orders (status Noudettu/Peruttu)
-        closedOrders: async () =>  { 
+        closedOrders: async (_: unknown, args: { locationIds: number[] }): Promise<Order[]> =>  { 
+            const { locationIds } = args
+            if (!Array.isArray(locationIds) || locationIds.length === 0) {
+                throw new Error('Invalid input: locationIds must be a non-empty array.');
+            }
             try {
                 const orders = await Order.findAll({
                     include: 'location', 
                     where: { 
                         status: {
                             [Op.or]: ['Noudettu', 'Peruttu']
-                        } 
+                        },
+                        locationId: {
+                            [Op.in]: locationIds
+                        }
                     },
                     order: [['createdAt', 'DESC']]
                 })
