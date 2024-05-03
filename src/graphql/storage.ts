@@ -145,7 +145,7 @@ export const resolvers = {
                 throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt}`);
             }
         },
-        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+        collectPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
             try {
                 // get current storages
                 const storages = await Storage.findAll({
@@ -184,7 +184,7 @@ export const resolvers = {
                 throw new Error(`Error: addPallets`);
             }
         },
-        collectPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
             try {
                 // get current storages
                 const storages = await Storage.findAll({
