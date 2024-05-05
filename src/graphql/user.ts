@@ -6,7 +6,13 @@ import { User, UserRole } from "../model"
 export const typeDef = `
   extend type Mutation {
     addUser(input: AddUserInput!): User!
+	changePassword(userId: Int!, password: String!): User!
 	login(username: String!, password: String!): AuthPayload!
+	deleteUser(id: Int!): User!
+  }
+
+  extend type Query {
+	usersByLocationId(locationId: Int!): [User]!
   }
 
   input AddUserInput {
@@ -109,6 +115,53 @@ export const resolvers = {
 					location: await user.getLocation()
 				}
 			}
+		},
+		deleteUser: async (_: unknown, { id }: { id: number }) => {
+			try {
+				const userToDelete = await User.findByPk(id)
+
+				if (!userToDelete) {
+					throw new Error(`User with id: ${id} not found`)
+				}
+
+				await userToDelete.destroy()
+				return userToDelete
+
+			} catch (error) {
+				throw new Error(`Unable to delete user by id: ${id}`)
+			}
+		},
+		changePassword: async (_: unknown, { userId, password }: { userId: number, password: string }) => {
+			try {
+				const userToUpdate = await User.findByPk(userId)
+				if (!userToUpdate) {
+					throw new Error('User not found')
+				}
+				const saltRounds: number = 10
+				const passwordHash: string = await bcrypt.hash(password, saltRounds)
+
+				userToUpdate.passwordHash = passwordHash
+				await userToUpdate.save()
+				return userToUpdate
+
+			} catch (error) {
+				throw new Error('Failed to change the password')
+			}
 		}
 	},
+
+	Query: {
+		usersByLocationId: async (_: unknown, { locationId }: { locationId: number }) => {
+			try {
+				const users = await User.findAll({
+					where: {
+						locationId: locationId
+					}
+				})
+				return users
+			} catch (error) {
+				throw new Error('Error retrieving users by locationId')
+			}
+		}
+	}
 }
