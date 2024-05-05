@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import { User, UserRole } from "../model"
+import { checkAdmin } from './util/authorizationChecks'
 
 export const typeDef = `
   extend type Mutation {
@@ -43,10 +44,7 @@ export const resolvers = {
 	Mutation: {
 		addUser: async (_: unknown, { input }: { input: AddUserInput }, context: { user?: any }) => {
 			// check that the user has the admin role
-			// TODO: This could be improved
-			if (!context.user || context.user.userRoleId !== 1) { 
-			  	throw new Error('Invalid token');
-			}
+			checkAdmin(context)
 		  
 			const { username, password, userRoleId } = input
 
