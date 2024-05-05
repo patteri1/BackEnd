@@ -93,10 +93,10 @@ export const resolvers = {
 			const token: string = jwt.sign({ 
 				userId: user.userId, 
 				username: user.username,
-				userRoleId:  user.userRoleId
+				userRoleId:  user.userRoleId,
+				locationId: user.locationId,
 			}, process.env.SECRET!, { expiresIn: 60*60 }) // one hour
-const location = await user.getLocation()
-console.log('MORORORORORO', location)
+
 			return {
 				token,
 				user: {

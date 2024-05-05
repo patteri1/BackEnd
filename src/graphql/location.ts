@@ -1,8 +1,9 @@
 
-import { group } from "console"
 import { Location, Storage, Product, LocationPrice } from "../model"
-import { Op, QueryTypes, where } from "sequelize"
+import { Op } from "sequelize"
 import { sequelize } from "../util/db"
+import { MyContext } from "./context"
+import { checkAdmin, checkAdminOrOwner } from "./util/authorizationChecks"
 
 export const typeDef = `
     extend type Query {
@@ -40,7 +41,6 @@ export const typeDef = `
         locationType: String
     }
 
-
     type LocationPrice {
         locationPriceId: Int!
         locationId: Int!
@@ -65,10 +65,13 @@ interface LocationInput {
 
 export const resolvers = {
     Query: {
-        location: async (_: unknown, args: { locationId: number }) => {
+        location: async (_: unknown, args: { locationId: number }, context: MyContext) => {
             const { locationId } = args
+            
+            checkAdminOrOwner(context, locationId)
 
             try {
+
                 const location = await Location.findByPk(locationId, {
                     include: [{
                         model: Storage,
@@ -91,7 +94,9 @@ export const resolvers = {
         },
 
         // get all locations
-        allLocations: async () => {
+        allLocations: async (_: unknown, __: unknown, context: MyContext) => {
+            checkAdmin(context)
+            
             try {
                 const allLocations = await Location.findAll({
                     include: [{
@@ -109,7 +114,10 @@ export const resolvers = {
         },
         // get locations by type (Kuljetusliike / Käsittelylaitos)
         locationsByType: async (_: unknown, args: { locationType: string }) => {
+            // TODO: what auth check is right here?
+
             try {
+
                 const locations = await Location.findAll({
                     where: {locationType: args.locationType}
                 })
@@ -120,10 +128,13 @@ export const resolvers = {
                 throw new Error('Error retrieving locations by type')
             }
         },
-        locationWithStorages: async (_: unknown, args: { locationId: number }) => {
+        locationWithStorages: async (_: unknown, args: { locationId: number }, context: MyContext) => {
             const { locationId } = args
             const currentDate = new Date()
-            try {
+
+            checkAdminOrOwner(context, locationId)
+
+            try {            
                 const location = await Location.findByPk(locationId, {
                     include: [{
                         model: LocationPrice,
@@ -162,35 +173,42 @@ export const resolvers = {
                 throw new Error(`Error retrieving location with id ${locationId}`)
             }
         },
-        allLocationsWithPrice: async () => {
-            const currentDate = new Date()
+        allLocationsWithPrice: async (_: unknown, __: unknown, context: MyContext) => {
+            checkAdmin(context)
+            
             try {
+
                 const locations = await Location.findAll({
                     include: [{
                         model: LocationPrice,
                         attributes: ['price', 'validFrom'],
                         order: [['validFrom', 'DESC']],
-
                     }]
                 })
-
+        
                 return locations
-
+        
             } catch (error) {
                 throw new Error('Error retrieving all locations ')
             }
         },
 
-        locationsWithStorages: async (_: unknown, args: { locationIds: number[] }): Promise<Location[]> => {
+        locationsWithStorages: async (_: unknown, args: { locationIds: number[] }, context: MyContext): Promise<Location[]> => {
             const currentDate = new Date();
             const { locationIds } = args
-            console.log(locationIds)
+            
             if (!Array.isArray(locationIds) || locationIds.length === 0) {
                 throw new Error('Invalid input: locationIds must be a non-empty array.');
             }
+            
+            // admin can access all, others only their own
+            if (locationIds.length > 1) {
+                checkAdmin(context)
+            } else {
+                checkAdminOrOwner(context, locationIds[0])
+            }
 
             try {
-
                 const locations: Location[] = await Location.findAll({
                     where: {
                         locationId: {
@@ -244,8 +262,11 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addLocation: async (_: unknown, { location }: { location: LocationInput }) => {
+        addLocation: async (_: unknown, { location }: { location: LocationInput }, context: MyContext) => {
+            checkAdmin(context)
+            
             try {
+
                 const newLocation = await Location.create(location as Partial<Location>)
                 return newLocation
             } catch (error) {
@@ -253,7 +274,9 @@ export const resolvers = {
 
             }
         },
-        deleteLocation: async (_: unknown, { id }: { id: number }) => {
+        deleteLocation: async (_: unknown, { id }: { id: number }, context: MyContext) => {
+            checkAdmin(context)
+            
             try {
                 const locationToDelete = await Location.findByPk(id)
 
@@ -268,7 +291,9 @@ export const resolvers = {
                 throw new Error(`Unable to delete location by id: ${id}`)
             }
         },
-        updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs): Promise<Location> => {
+        updateLocation: async (_: unknown, { locationId, input }: UpdateLocationArgs, context: MyContext): Promise<Location> => {
+            checkAdminOrOwner(context, locationId)
+            
             try {
                 const locationToUpdate = await Location.findByPk(locationId)
                 if (!locationToUpdate) {
@@ -285,7 +310,9 @@ export const resolvers = {
                 }
             }
         },
-        addStorageToLocation: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number }) => {
+        addStorageToLocation: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number }, context: MyContext) => {
+            checkAdminOrOwner(context, args.locationId);
+            
             try {
                 const location = await Location.findByPk(args.locationId);
                 const product = await Product.findByPk(args.productId);
@@ -317,7 +344,5 @@ export const resolvers = {
                 throw new Error(`Error adding Storage to Location`);
             }
         },
-
     }
-
-};
+}
