@@ -27,9 +27,10 @@ export async function createDailyReports(startDate: Date, endDate: Date, locatio
 
         const dailyReport: DailyReport = {
             date: d.toISOString(),
+            price: currentValidLocationPrice.price,
             productReports: productReports,
-            totalDailyPallets: totalDailyPallets,
-            totalDailyCost: parseFloat(totalDailyCost.toFixed(2)),
+            totalDailyPallets: totalDailyPallets,   
+            totalDailyCost: totalDailyCost,
         }
         dailyReports.push(dailyReport)
     }
@@ -56,7 +57,7 @@ async function createProductReports(location: Location, date: Date, products: Pr
         const productReport: ProductReport = {
             product: product,
             palletAmount: amount,
-            cost: parseFloat(cost.toFixed(2)),
+            cost: cost,
         }
 
         productReports.push(productReport)
