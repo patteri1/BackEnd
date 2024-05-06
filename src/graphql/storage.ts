@@ -11,6 +11,7 @@ export const typeDef = `
     extend type Mutation {
         setAmountToStorage(locationId: Int!, productId: Int!, palletAmount: Int!): Storage
         addPallets(storageInput: StorageInput!): Storage
+        collectPallets(storageInput: StorageInput!): Storage
     }
 
     type Storage {
@@ -144,7 +145,7 @@ export const resolvers = {
                 throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt}`);
             }
         },
-        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+        collectPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
             try {
                 // get current storages
                 const storages = await Storage.findAll({
@@ -176,7 +177,45 @@ export const resolvers = {
                 })
                 Storage.bulkCreate(rows)
 
-                return rows[0] // (todo fix: return all rows)
+                return rows[0]
+
+            } catch (error) {
+                console.log(error)
+                throw new Error(`Error: addPallets`);
+            }
+        },
+        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+            try {
+                // get current storages
+                const storages = await Storage.findAll({
+                    include: [
+                        Location,
+                        Product, 
+                    ],
+                    where: sequelize.literal(`(
+                        (storage."productId", storage."createdAt")
+                        IN (
+                            SELECT "productId", MAX("createdAt") 
+                            FROM storage
+                            WHERE "locationId" = :locationId 
+                            GROUP BY "productId"
+                        )
+                    )`),
+                    replacements: { locationId: storageInput.locationId },
+                },
+                )
+
+                const rows = storageInput.storageRows.map((row) => {
+                    const storage = storages.find(storage => storage.productId === row.productId)
+                    return {
+                        locationId: storageInput.locationId,
+                        productId: row.productId,
+                        palletAmount: row.palletAmount
+                    }
+                })
+                Storage.bulkCreate(rows)
+
+                return rows[0]
 
             } catch (error) {
                 console.log(error)

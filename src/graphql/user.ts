@@ -6,13 +6,20 @@ import { User, UserRole } from "../model"
 export const typeDef = `
   extend type Mutation {
     addUser(input: AddUserInput!): User!
+	changePassword(userId: Int!, password: String!): User!
 	login(username: String!, password: String!): AuthPayload!
+	deleteUser(id: Int!): User!
+  }
+
+  extend type Query {
+	usersByLocationId(locationId: Int!): [User]!
   }
 
   input AddUserInput {
     username: String!
     password: String!
     userRoleId: Int!
+	locationId: Int!
   }
 
   type AuthPayload {
@@ -37,6 +44,7 @@ interface AddUserInput {
 	username: string
 	password: string
 	userRoleId: number
+	locationId: number
 }
 
 export const resolvers = {
@@ -44,11 +52,11 @@ export const resolvers = {
 		addUser: async (_: unknown, { input }: { input: AddUserInput }, context: { user?: any }) => {
 			// check that the user has the admin role
 			// TODO: This could be improved
-			if (!context.user || context.user.userRoleId !== 1) { 
-			  	throw new Error('Invalid token');
+			if (!context.user || context.user.userRoleId !== 1) {
+				throw new Error('Invalid token');
 			}
-		  
-			const { username, password, userRoleId } = input
+
+			const { username, password, userRoleId, locationId } = input
 
 			// Hash the password
 			const saltRounds: number = 10
@@ -64,12 +72,14 @@ export const resolvers = {
 			const user: User = await User.create({
 				username,
 				passwordHash,
-				userRoleId: userRoleId
+				userRoleId: userRoleId,
+				locationId: locationId
 			})
 
 			return {
 				userId: user.userId,
 				username: user.username,
+				locationId: locationId,
 				userRole: {
 					userRoleId: role.userRoleId,
 					roleName: role.roleName,
@@ -77,8 +87,8 @@ export const resolvers = {
 			}
 		},
 
-		login: async (_:unknown, { username, password }: {username: string, password: string}) => {
-			const user: User | null = await User.findOne({ where: { username }})
+		login: async (_: unknown, { username, password }: { username: string, password: string }) => {
+			const user: User | null = await User.findOne({ where: { username } })
 			if (!user) {
 				throw new Error('User not found')
 			}
@@ -90,13 +100,12 @@ export const resolvers = {
 			}
 
 			// generate an authentication token
-			const token: string = jwt.sign({ 
-				userId: user.userId, 
+			const token: string = jwt.sign({
+				userId: user.userId,
 				username: user.username,
-				userRoleId:  user.userRoleId
-			}, process.env.SECRET!, { expiresIn: 60*60 }) // one hour
-const location = await user.getLocation()
-console.log('MORORORORORO', location)
+				userRoleId: user.userRoleId
+			}, process.env.SECRET!, { expiresIn: 60 * 60 }) // one hour
+			const location = await user.getLocation()
 			return {
 				token,
 				user: {
@@ -106,6 +115,53 @@ console.log('MORORORORORO', location)
 					location: await user.getLocation()
 				}
 			}
+		},
+		deleteUser: async (_: unknown, { id }: { id: number }) => {
+			try {
+				const userToDelete = await User.findByPk(id)
+
+				if (!userToDelete) {
+					throw new Error(`User with id: ${id} not found`)
+				}
+
+				await userToDelete.destroy()
+				return userToDelete
+
+			} catch (error) {
+				throw new Error(`Unable to delete user by id: ${id}`)
+			}
+		},
+		changePassword: async (_: unknown, { userId, password }: { userId: number, password: string }) => {
+			try {
+				const userToUpdate = await User.findByPk(userId)
+				if (!userToUpdate) {
+					throw new Error('User not found')
+				}
+				const saltRounds: number = 10
+				const passwordHash: string = await bcrypt.hash(password, saltRounds)
+
+				userToUpdate.passwordHash = passwordHash
+				await userToUpdate.save()
+				return userToUpdate
+
+			} catch (error) {
+				throw new Error('Failed to change the password')
+			}
 		}
 	},
+
+	Query: {
+		usersByLocationId: async (_: unknown, { locationId }: { locationId: number }) => {
+			try {
+				const users = await User.findAll({
+					where: {
+						locationId: locationId
+					}
+				})
+				return users
+			} catch (error) {
+				throw new Error('Error retrieving users by locationId')
+			}
+		}
+	}
 }
