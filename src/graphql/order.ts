@@ -1,5 +1,7 @@
 import { Op } from 'sequelize'
 import { Order, OrderRow } from '../model/'
+import { checkAdminOrOwner, checkHasRole } from './util/authorizationChecks'
+import { MyContext } from './context'
 
 export const typeDef = `
     extend type Query {
@@ -62,7 +64,8 @@ interface OrderRowInput {
 export const resolvers = {
     Query: {
         // get order by id
-        order: async (_: unknown, args: { orderId: number }) => {
+        order: async (_: unknown, args: { orderId: number }, context: MyContext) => {
+            checkHasRole(context)
             const { orderId } = args
 
             try {
@@ -88,7 +91,8 @@ export const resolvers = {
             }
         },
         // get all orders (without rows)
-        allOrders: async () =>  { 
+        allOrders: async (_:unknown, context: MyContext) =>  { 
+            checkHasRole(context)
             try {
                 const allOrders = await Order.findAll({
                     include: 'location'
@@ -102,7 +106,8 @@ export const resolvers = {
             }
         },
         // get all open orders (status Avattu)
-        openOrders: async (_: unknown, args: { locationIds: number[] }): Promise<Order[]> =>  { 
+        openOrders: async (_: unknown, args: { locationIds: number[] }, context: MyContext): Promise<Order[]> =>  { 
+            checkHasRole(context)
             const { locationIds } = args
             if (!Array.isArray(locationIds) || locationIds.length === 0) {
                 throw new Error('Invalid input: locationIds must be a non-empty array.');
@@ -128,7 +133,8 @@ export const resolvers = {
             }
         },
         // get all closed orders (status Noudettu/Peruttu)
-        closedOrders: async (_: unknown, args: { locationIds: number[] }): Promise<Order[]> =>  { 
+        closedOrders: async (_: unknown, args: { locationIds: number[] }, context: MyContext): Promise<Order[]> =>  { 
+            checkHasRole(context)
             const { locationIds } = args
             if (!Array.isArray(locationIds) || locationIds.length === 0) {
                 throw new Error('Invalid input: locationIds must be a non-empty array.');
@@ -156,9 +162,10 @@ export const resolvers = {
         }
     },
     Mutation: {
-        addOrder: async (_: unknown, { input }: { input: AddOrderInput }) => {
+        addOrder: async (_: unknown, { input }: { input: AddOrderInput }, context: { user?: any }) => {
             try {
                 const { locationId, status, orderRows } = input
+                checkAdminOrOwner(context, locationId)
                 const order: Order = await Order.create({
                     locationId: locationId,
                     status,
@@ -189,7 +196,8 @@ export const resolvers = {
             }
         },
         // mark order as collected
-        collectOrder: async (_: unknown, args: { orderId: number }) => {
+        collectOrder: async (_: unknown, args: { orderId: number }, context: MyContext) => {
+            checkHasRole(context)
             const { orderId } = args
 
             try {
@@ -220,7 +228,8 @@ export const resolvers = {
             }
         },
         // mark order as cancelled
-        cancelOrder: async (_: unknown, args: { orderId: number }) => {
+        cancelOrder: async (_: unknown, args: { orderId: number }, context: MyContext) => {
+            checkHasRole(context)
             const { orderId } = args
 
             try {

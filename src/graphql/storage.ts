@@ -1,6 +1,8 @@
 import { Storage, Product, Location, Order, OrderRow } from '../model'
 import { Op } from "sequelize"
 import { sequelize } from "../util/db"
+import { MyContext } from './context'
+import { checkHasRole } from './util/authorizationChecks'
 
 export const typeDef = `
     extend type Query {
@@ -46,7 +48,8 @@ interface StorageRowInput {
 
 export const resolvers = {
     Query: {
-        allStorages: async () => {
+        allStorages: async (_: unknown, __: unknown, context: MyContext) => {
+            checkHasRole(context)
             try {
                 const allStorages = await Storage.findAll({ include: Product })
                 return allStorages
@@ -56,7 +59,8 @@ export const resolvers = {
             }
         },
         // storages available for ordering
-        availableStorages: async () => {
+        availableStorages: async (_: unknown, __: unknown, context: MyContext) => {
+            checkHasRole(context)
             try {
                 // get current storages in käsittelylaitos
                 const storages = await Storage.findAll({
@@ -114,38 +118,8 @@ export const resolvers = {
         }
     },
     Mutation: {
-        setAmountToStorage: async (_: unknown, args: { locationId: number, productId: number, palletAmount: number, createdAt: string }) => {
-            try {
-                console.log('Updating palletAmount in storage for Location ID:', args.locationId, 'and Product ID:', args.productId);
-
-                // todo fix: this is probably very broken due to db changes.
-
-                // redo or make a new one
-
-                const storage = await Storage.findOne({
-                    where: {
-                        locationId: args.locationId,
-                        productId: args.productId,
-                        createdAt: args.createdAt // Add the condition for createdAt
-                    },
-                });
-
-                if (!storage) {
-                    throw new Error(`Storage with Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt} not found`);
-                }
-
-                storage.palletAmount = args.palletAmount;
-                await storage.save();
-
-                console.log('Successfully updated palletAmount in storage:', storage);
-
-                return storage;
-            } catch (error) {
-                console.error(error);
-                throw new Error(`Error updating palletAmount in storage for Location ID ${args.locationId}, Product ID ${args.productId}, and Created At ${args.createdAt}`);
-            }
-        },
-        collectPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+        collectPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }, context: MyContext) => {
+            checkHasRole(context)
             try {
                 // get current storages
                 const storages = await Storage.findAll({
@@ -184,7 +158,8 @@ export const resolvers = {
                 throw new Error(`Error: addPallets`);
             }
         },
-        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }) => {
+        addPallets: async (_: unknown, { storageInput }: { storageInput: StorageInput }, context: MyContext) => {
+            checkHasRole(context)
             try {
                 // get current storages
                 const storages = await Storage.findAll({

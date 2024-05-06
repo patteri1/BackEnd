@@ -14,3 +14,10 @@ export const checkAdminOrOwner = (context: MyContext, locationId: number) => {
     }
   }
 }
+
+// If the user does not have any role, throw an error
+export const checkHasRole = (context: MyContext) => {
+    if (!context.user) {
+      throw new Error('Unauthorized')
+    }
+}

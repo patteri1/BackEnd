@@ -3,7 +3,7 @@ import { Location, Storage, Product, LocationPrice } from "../model"
 import { Op } from "sequelize"
 import { sequelize } from "../util/db"
 import { MyContext } from "./context"
-import { checkAdmin, checkAdminOrOwner } from "./util/authorizationChecks"
+import { checkAdmin, checkAdminOrOwner, checkHasRole } from "./util/authorizationChecks"
 
 export const typeDef = `
     extend type Query {
@@ -68,7 +68,7 @@ export const resolvers = {
         location: async (_: unknown, args: { locationId: number }, context: MyContext) => {
             const { locationId } = args
             
-            checkAdminOrOwner(context, locationId)
+            checkHasRole(context)
 
             try {
 
@@ -95,7 +95,7 @@ export const resolvers = {
 
         // get all locations
         allLocations: async (_: unknown, __: unknown, context: MyContext) => {
-            checkAdmin(context)
+            checkHasRole(context)
             
             try {
                 const allLocations = await Location.findAll({
@@ -113,8 +113,8 @@ export const resolvers = {
             }
         },
         // get locations by type (Kuljetusliike / Käsittelylaitos)
-        locationsByType: async (_: unknown, args: { locationType: string }) => {
-            // TODO: what auth check is right here?
+        locationsByType: async (_: unknown, args: { locationType: string }, context: MyContext) => {
+            checkHasRole(context)
 
             try {
 
