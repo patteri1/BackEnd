@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import { User, UserRole } from "../model"
+import { checkAdmin } from './util/authorizationChecks'
 
 export const typeDef = `
   extend type Mutation {
@@ -51,12 +52,9 @@ export const resolvers = {
 	Mutation: {
 		addUser: async (_: unknown, { input }: { input: AddUserInput }, context: { user?: any }) => {
 			// check that the user has the admin role
-			// TODO: This could be improved
-			if (!context.user || context.user.userRoleId !== 1) {
-				throw new Error('Invalid token');
-			}
-
-			const { username, password, userRoleId, locationId } = input
+			checkAdmin(context)
+		  
+			const { username, password, userRoleId } = input
 
 			// Hash the password
 			const saltRounds: number = 10
@@ -73,13 +71,13 @@ export const resolvers = {
 				username,
 				passwordHash,
 				userRoleId: userRoleId,
-				locationId: locationId
+				locationId: input.locationId
 			})
 
 			return {
 				userId: user.userId,
 				username: user.username,
-				locationId: locationId,
+				locationId: user.locationId,
 				userRole: {
 					userRoleId: role.userRoleId,
 					roleName: role.roleName,
@@ -103,9 +101,10 @@ export const resolvers = {
 			const token: string = jwt.sign({
 				userId: user.userId,
 				username: user.username,
-				userRoleId: user.userRoleId
-			}, process.env.SECRET!, { expiresIn: 60 * 60 }) // one hour
-			const location = await user.getLocation()
+				userRoleId:  user.userRoleId,
+				locationId: user.locationId,
+			}, process.env.SECRET!, { expiresIn: 60*60 }) // one hour
+
 			return {
 				token,
 				user: {
