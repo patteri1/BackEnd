@@ -174,7 +174,7 @@ export const resolvers = {
             }
         },
         allLocationsWithPrice: async (_: unknown, __: unknown, context: MyContext) => {
-            checkAdmin(context)
+            checkHasRole(context)
             
             try {
 
