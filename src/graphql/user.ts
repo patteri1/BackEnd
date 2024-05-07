@@ -115,7 +115,9 @@ export const resolvers = {
 				}
 			}
 		},
-		deleteUser: async (_: unknown, { id }: { id: number }) => {
+		deleteUser: async (_: unknown, { id }: { id: number }, context: { user?: any }) => {
+			checkAdmin(context)
+
 			try {
 				const userToDelete = await User.findByPk(id)
 
@@ -130,7 +132,9 @@ export const resolvers = {
 				throw new Error(`Unable to delete user by id: ${id}`)
 			}
 		},
-		changePassword: async (_: unknown, { userId, password }: { userId: number, password: string }) => {
+		changePassword: async (_: unknown, { userId, password }: { userId: number, password: string }, context: { user?: any }) => {
+			checkAdmin(context)
+			
 			try {
 				const userToUpdate = await User.findByPk(userId)
 				if (!userToUpdate) {
@@ -150,7 +154,9 @@ export const resolvers = {
 	},
 
 	Query: {
-		usersByLocationId: async (_: unknown, { locationId }: { locationId: number }) => {
+		usersByLocationId: async (_: unknown, { locationId }: { locationId: number }, context: { user?: any }) => {
+			checkAdmin(context)
+
 			try {
 				const users = await User.findAll({
 					where: {
