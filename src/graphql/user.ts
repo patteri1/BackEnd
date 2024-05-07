@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import { User, UserRole } from "../model"
-import { checkAdmin } from './util/authorizationChecks'
+import { checkAdmin, checkAdminOrOwner } from './util/authorizationChecks'
 
 export const typeDef = `
   extend type Mutation {
@@ -155,7 +155,7 @@ export const resolvers = {
 
 	Query: {
 		usersByLocationId: async (_: unknown, { locationId }: { locationId: number }, context: { user?: any }) => {
-			checkAdmin(context)
+			checkAdminOrOwner(context, locationId)
 
 			try {
 				const users = await User.findAll({
