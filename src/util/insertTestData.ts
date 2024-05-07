@@ -257,6 +257,13 @@ export const insertTestData = async () => {
 
             Storage.create({
                 locationId: location2.locationId,
+                productId: product1.productId,
+                palletAmount: 8,
+                createdAt: '2023-12-28 16:32:39.175+00'
+            }),
+
+            Storage.create({
+                locationId: location2.locationId,
                 productId: product2.productId,
                 palletAmount: 3,
                 createdAt: '2023-12-28 16:33:39.175+00'

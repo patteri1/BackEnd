@@ -6,6 +6,7 @@ export interface MyContext {
       userId: number;
       username: string;
       userRoleId: number;
+      locationId: number;
     };
 }
 

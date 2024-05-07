@@ -1,4 +1,6 @@
 import { LocationPrice } from '../model'
+import { MyContext } from "./context"
+import { checkAdminOrOwner } from './util/authorizationChecks'
 
 export const typeDef = `
     extend type Mutation {
@@ -20,8 +22,9 @@ interface LocationPriceInput {
 
 export const resolvers = {
     Mutation: {
-        addLocationPrice: async (_: unknown, { locationPrice }: { locationPrice: LocationPriceInput }) => {
+        addLocationPrice: async (_: unknown, { locationPrice }: { locationPrice: LocationPriceInput }, context: MyContext) => {
             try {
+                checkAdminOrOwner(context, locationPrice.locationId)
                 const newPrice = LocationPrice.create(locationPrice as Partial<LocationPrice>)
                 return newPrice
             } catch (error) {

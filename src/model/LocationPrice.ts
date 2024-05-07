@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize'
 import { sequelize } from '../util/db'
+import { formatDateTime } from '../util/datetimeUtils'
 
 export class LocationPrice extends Model {
     declare locationPriceId: number

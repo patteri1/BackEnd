@@ -3,6 +3,7 @@ import { createDailyReports } from './util/reportUtils';
 import { sequelize } from '../util/db';
 import { Op, QueryTypes } from 'sequelize';
 import { validLocationPricesForDateRange, validStoragesForDateRange } from './util/db_queries';
+import { checkAdmin } from './util/authorizationChecks';
 
 export const typeDef: string = `
     extend type Query {
@@ -27,6 +28,7 @@ export const typeDef: string = `
 
     type DailyReport {
         date: String!
+        price: Float!
         productReports: [ProductReport]
         totalDailyPallets: Int!
         totalDailyCost: Float!
@@ -57,6 +59,7 @@ export interface LocationReport {
 
 export interface DailyReport {
     date: string
+    price: number
     productReports: ProductReport[]
     totalDailyPallets: number
     totalDailyCost: number
@@ -71,11 +74,7 @@ export interface ProductReport {
 export const resolvers = {
     Query: {
         report: async (_: unknown, args: { input: ReportInput }, context: { user?: any }): Promise<Report> => {
-            // check that the user has the admin role
-			// TODO: This could be improved
-			if (!context.user || context.user.userRoleId !== 1) { 
-                throw new Error('Invalid token');
-            }
+            checkAdmin(context)
 
             const startDate: Date = new Date(args.input.startDate)
             const endDate: Date = new Date(args.input.endDate)
@@ -144,7 +143,7 @@ export const resolvers = {
                 let dailyReports: DailyReport[] = await createDailyReports(startDate, endDate, location)                
 
                 // calculate total cost for the location
-                const totalCost = parseFloat(dailyReports.reduce((total, report) => total + report.totalDailyCost, 0).toFixed(2))
+                const totalCost = dailyReports.reduce((total, report) => total + report.totalDailyCost, 0)
 
                 // create location report
                 const locationReport: LocationReport = {

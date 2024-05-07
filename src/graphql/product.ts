@@ -1,4 +1,6 @@
 import { Product } from '../model/Product'
+import { MyContext } from './context'
+import { checkHasRole } from './util/authorizationChecks'
 
 export const typeDef = `
     extend type Query {
@@ -14,7 +16,8 @@ export const typeDef = `
 `
 export const resolvers = {
     Query: {
-        allProducts: async () => {
+        allProducts: async (_: unknown, __: unknown, context: MyContext) => {
+            checkHasRole(context)
             try {
                 const allProducts = await Product.findAll()
                 return allProducts
