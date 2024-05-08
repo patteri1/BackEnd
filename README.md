@@ -1,12 +1,23 @@
-# Patteri 1 - Backend 
+# Patteri 1 - Server 
+
+The server for providing the GraphQL API and business logic like managing orders and creating storage reports for the [Patteri 1 application](https://github.com/patteri1/frontend). With the API the application can fetch, add and edit the data in the database.
+
+## Built with
+
+- Node.js
+- TypeScript
+- Apollo GraphQL
+- PostgreSQL
+- Sequelize ORM
+- Docker
 
 ## Getting started
 
 ### Prerequisites
 
-Visual Studio Code, the [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) extension and Docker are required for this setup.
+Easiest way to run the server locally is by using Visual Studio Code, the [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) extension and Docker.
 
-### Setting up the Dev Container and installing the application
+### Running the server locally with Dev Containers
 
 1. Clone the repository to your machine and open it with VS Code.
 
@@ -46,13 +57,7 @@ Visual Studio Code, the [Remote Development](https://marketplace.visualstudio.co
 2. Open a terminal and access the database container shell.
 
     ```
-    docker exec -it [container-id] bash
-    ```
-
-3. In the container open the PostgreSQL terminal as the `postgres` user.
-
-    ```
-    psql -U postgres
+    docker exec -it [container-id] psql -U postgres
     ```
 
     You can now run SQL commands to create, update and delete data in the database. The command `\d` shows the contents of the database. You can exit psql with `\q`. You can exit the container shell with `Ctrl + D`.
